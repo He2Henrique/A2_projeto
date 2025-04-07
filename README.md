@@ -5,7 +5,7 @@ Projeto para controle de presenças para uma instituição de bale e luta.
 - Gerenciar alunos
 ~~~
 Cadastrar alunos
-Procuarar e editar alunos
+Procurar e editar alunos
 ~~~
 - Registrar aulas
 - Controle de presença
