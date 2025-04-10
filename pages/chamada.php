@@ -1,6 +1,0 @@
-<?php
-    //declaration of functions
-
-   
-
-    

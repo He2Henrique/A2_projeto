@@ -1,8 +1,5 @@
 <?php
 
-
-
-
 //validar CPF
 function validarCPF(string $cpf): bool
 {
@@ -33,4 +30,13 @@ function formatCPF(string $cpf): string
     $cpf = preg_replace('/[^0-9]/', '', $cpf);
     
     return $cpf;
+}
+
+
+function calcularIdade(string $data_nasc): int
+{
+    $data_nasc = DateTime::createFromFormat('Y-m-d', $data_nasc);
+    $hoje = new DateTime();
+    
+    return $hoje->diff($data_nasc)->y;
 }

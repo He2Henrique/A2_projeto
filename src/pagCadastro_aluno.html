@@ -7,8 +7,9 @@
 </head>
 <body>
     <h1>Cadastro de Aluno</h1>
-    <form action="../pages/cadastra.php" method="post">
-        <input type="hidden" name="action" value="cadastro">
+    <!-- a instituicao precisa de apenas nome completo, filiacao -->
+    <form action="cadastra_alunos.php" method="post">
+        <input type="hidden" name="action" value="cadastro_aluno">
         <div>
             <label for="nome" >Nome Completo</label>
             <input type="text" id="nome" name="nome" required>
@@ -16,10 +17,13 @@
         </div>
 
         <div>
+            <!-- importante adicionar alguma forma de data min e maxima -->
             <label for="data_nasc" >Data de Nascimento</label>
             <input type="date" id="data_nasc" name="data_nasc" required>
+            <!-- fazer uma validacao de idade simples em js -->
         </div>
 
+        <!-- eles pegam a agfiliacao -->
         <div>
             <label for="cpf" >CPF</label>
             <input type="text" id="cpf" name="cpf" required placeholder="000.000.000-00">
@@ -44,6 +48,7 @@
         <div>
             <label for="curso" >Curso de Interesse #(exemplo)</label>
             <select id="curso" name="curso" required>
+                <!-- pode usar php nessa parte para renderizar os cursos -->
                 <option value="">Selecione um curso</option>
                 <option value="informatica">Informática Básica</option>
                 <option value="ingles">Inglês</option>
