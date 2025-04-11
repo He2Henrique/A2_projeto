@@ -10,3 +10,5 @@ Procurar e editar alunos
 - Registrar aulas
 - Controle de presença
 - visualizar aulas passadas
+
+- ...
