@@ -1,0 +1,26 @@
+/* Novo Estilo para o Header */
+header {
+    background-color: #1C2331; /* Azul Escuro Sofisticado */
+    color: #ffffff; /* Texto Branco */
+}
+
+.navbar-brand {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #ffffff !important; /* Dourado para destaque */
+}
+
+.navbar .nav-link {
+    color: #ffffff !important;
+    font-size: 1.1rem;
+    transition: color 0.3s ease-in-out;
+}
+
+.navbar .nav-link:hover {
+    color: #FFD700 !important; /* Dourado no hover */
+}
+
+/* Sombra para destaque */
+.shadow-sm {
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
