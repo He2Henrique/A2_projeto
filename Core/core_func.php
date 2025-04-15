@@ -62,3 +62,11 @@ function validarTelefone(string $telefone): bool
     // Verifica se o telefone tem 10 ou 11 dígitos (DDD + número)
     return (strlen($telefone) == 10 || strlen($telefone) == 11);
 }
+
+function Idade(string $data_nasc): int
+{
+    $data_nasc = DateTime::createFromFormat('Y-m-d', $data_nasc);
+    $hoje = new DateTime();
+    
+    return $hoje->diff($data_nasc)->y;
+}
