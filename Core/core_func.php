@@ -1,4 +1,17 @@
 <?php
+//definindo variáveis e funções para o sistema
+$diasSemana = [
+    1 => 'Segunda',
+    2 => 'Terça',
+    3 => 'Quarta',
+    4 => 'Quinta',
+    5 => 'Sexta',
+    6 => 'Sábado'
+];
+
+$data_hoje = date('Y-m-d');
+
+$dia_sem = date('w', strtotime($data_hoje)); // 0 = domingo, 1 = segunda, ..., 6 = sabado
 
 //validar CPF
 function validarCPF(string $cpf): bool

@@ -6,11 +6,16 @@ if (!isset($_SESSION['usuario'])) {
     exit;
 }
 require_once('../Core/config_serv.php'); // Incluindo o arquivo de configuração do banco de dados
+require_once('../Core/core_func.php'); // Incluindo o arquivo de funções do banco de dados
 
-$conn = DatabaseManager::getInstance(); // Conexão com o banco de dados
 
-$data_hoje = date('Y-m-d');  // Definição da data de hoje
+$conn = DatabaseManager::getInstance(); // Conexão com o banco de dados  // Definição da data de hoje
 
+$consult= $conn->select('modalidades',[]); // Seleciona todas as modalidades
+
+foreach ($consult as $modalidade) {
+    $modalidades[$modalidade['id']] = $modalidade['nome'] . ' - ' . $modalidade['faixa_etaria'];
+}
 // Separar aulas por modalidade
 // $aulas_jiujitsu = $conn->select('aulas', ['modalidade' => 'jiujitsu'], 'data ASC, horario ASC');
 // $aulas_bale = $conn->select('aulas', ['modalidade' => 'bale'], 'data ASC, horario ASC');
@@ -55,7 +60,7 @@ $data_hoje = date('Y-m-d');  // Definição da data de hoje
 
         <!-- Aulas de Jiu-Jitsu -->
         <div class="card p-4 shadow-sm mb-4">
-            <h5 class="mb-3">Aulas de Jiu-Jitsu</h5>
+            <h5 class="mb-3">Aulas de hoje</h5>
             <div class="table-responsive">
                 <table class="table table-hover table-bordered">
                     <thead class="table-dark">
@@ -67,64 +72,28 @@ $data_hoje = date('Y-m-d');  // Definição da data de hoje
                             <th>Ações</th>
                         </tr>
                     </thead>
-                    <?php $aula_hoje = ($aula['data'] == $data_hoje); ?>
-                    <!-- <tbody>
-                        <?php foreach ($aulas_jiujitsu as $aula): ?>
-                        <tr class="<?= $aula_hoje ? 'hoje' : '' ?>">
-                            <td><?= date('d/m/Y', strtotime($aula['data'])) ?></td>
-                            <td><?= $aula['dia_semana'] ?></td>
-                            <td><?= $aula['turma'] ?></td>
-                            <td><?= substr($aula['horario'], 0, 5) ?></td>
-                            <td>
-                                <a href="registrar_chamada.php?data=<?= $aula['data'] ?>&turma=<?= urlencode($aula['turma']) ?>&modalidade=jiujitsu"
-                                    class="btn btn-sm btn-<?= $aula_hoje ? 'success' : 'primary' ?>">Registrar
-                                    Chamada</a>
-                                <a href="visualizar_presenca.php?data=<?= $aula['data'] ?>&turma=<?= urlencode($aula['turma']) ?>&modalidade=jiujitsu"
-                                    class="btn btn-sm btn-secondary">Presenças</a>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody> -->
-                </table>
-            </div>
-        </div>
-
-        <!-- Aulas de Balé -->
-        <div class="card p-4 shadow-sm">
-            <h5 class="mb-3">Aulas de Balé</h5>
-            <div class="table-responsive">
-                <table class="table table-hover table-bordered">
-                    <thead class="table-dark">
+                    <tbody>
+                        <?php
+                            $aulas_hoje = $conn->select('aulas', ['dia_sem' => $diasSemana[$dia_sem]], 'id_aulas, id_modalidade, dia_sem, horario');
+                        ?>
+                        <?php foreach($aulas_hoje as $aula): ?>
                         <tr>
-                            <th>Data</th>
-                            <th>Dia</th>
-                            <th>Turma</th>
-                            <th>Horário</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <!-- <tbody>
-                        <?php foreach ($aulas_bale as $aula): ?>
-                        <?php $aula_hoje = ($aula['data'] == $data_hoje); ?>
-                        <tr class="<?= $aula_hoje ? 'hoje' : '' ?>">
-                            <td><?= date('d/m/Y', strtotime($aula['data'])) ?></td>
-                            <td><?= $aula['dia_semana'] ?></td>
-                            <td><?= $aula['turma'] ?></td>
-                            <td><?= substr($aula['horario'], 0, 5) ?></td>
+                            <td><?= date('d/m/Y') ?></td>
+                            <td><?= $aula['dia_sem'] ?></td>
+                            <td><?= $modalidades[$aula['id_modalidade']]?></td>
+                            <td><?= $aula['horario']?></td>
                             <td>
-                                <a href="registrar_chamada.php?data=<?= $aula['data'] ?>&turma=<?= urlencode($aula['turma']) ?>&modalidade=bale"
-                                    class="btn btn-sm btn-<?= $aula_hoje ? 'success' : 'primary' ?>">Registrar
+                                <a href="registrar_chamada.php?aula=<?= $aula['id_aulas'] ?>"
+                                    class="btn btn-sm btn-success">Registrar
                                     Chamada</a>
-                                <a href="visualizar_presenca.php?data=<?= $aula['data'] ?>&turma=<?= urlencode($aula['turma']) ?>&modalidade=bale"
-                                    class="btn btn-sm btn-secondary">Presenças</a>
+
                             </td>
                         </tr>
                         <?php endforeach; ?>
-                    </tbody> -->
+                    </tbody>
                 </table>
             </div>
         </div>
-
     </div>
 </body>
 
