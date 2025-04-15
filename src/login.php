@@ -10,11 +10,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $senha = $_POST['senha'];
 
    $resultado = $conn->select('usuarios', ['email' => $email, 'senha' => $senha]);
+    // O método select deve retornar um array com os dados do usuário ou false se não existir
    //usando metodos do select para verificar se o usuario existe, va em config_serv.php e veja como funciona o select
     //se existir o usuario, ele retorna um array com os dados do usuario, se não existir retorna false
    if ($resultado) {
-        $_SESSION['usuario'] = $usuario['nome'];
-        header("Location: ../Core/tests.php");// manda para a página do professor
+        print_r($resultado);
+        $_SESSION['usuario'] = $resultado[0]['nome'];
+        header("Location: main.php"); // Redireciona para a página principal
         exit;
     } else {
         $erro = "Email ou senha incorretos.";

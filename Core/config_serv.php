@@ -107,6 +107,19 @@
 			
 			return $data;
 		}
+
+		public function lastRecord($table, $id) {
+			$sql = "SELECT * FROM $table ORDER BY $id DESC LIMIT 1";
+			$result = $this->connection->query($sql);
+			
+			if ($result->num_rows > 0) {
+				return $result->fetch_assoc();
+			} else {
+				return null;
+			}
+		}
+
+		
 		
 		// Prevenir clonagem da instância
 		private function __clone() {

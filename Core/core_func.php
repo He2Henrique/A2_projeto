@@ -40,3 +40,12 @@ function calcularIdade(string $data_nasc): int
     
     return $hoje->diff($data_nasc)->y;
 }
+
+function validarTelefone(string $telefone): bool
+{
+    // Remove caracteres não numéricos
+    $telefone = preg_replace('/[^0-9]/', '', $telefone);
+    
+    // Verifica se o telefone tem 10 ou 11 dígitos (DDD + número)
+    return (strlen($telefone) == 10 || strlen($telefone) == 11);
+}
