@@ -15,6 +15,7 @@ foreach ($consulta as $modalidade) {
     $modalidades[$modalidade['id']] = $modalidade['nome'] . ' - ' . $modalidade['faixa_etaria'];
 }
 
+$result = null; // Inicializa a variável result como nula
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nome = $_POST['nome_completo'] ?? null;
     $nome_social = $_POST['nome_social'] ?? null;
@@ -115,24 +116,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
 
             <div class="row mb-3">
-
                 <div class="col-md-6">
-
                     <label>Modalidades</label>
-                    <br>
-                    <?php
-                     $aulas = $conne->select('aulas', [], 'id_aulas, id_modalidade, dia_sem, horario'); 
-                     foreach ($aulas as $aula) {
-                        
-                        echo "<label for=\"opcoes\" class=\"form-check-label\">{$modalidades[$aula['id_modalidade']]} {$aula['dia_sem']} as {$aula['horario']}</label>";
-                        echo "<input type=\"checkbox\" name=\"opcoes[]\" value=\"{$aula['id_aulas']}\" class=\"form-check-input\" >";
-                        echo "<br>";
-                       
-                     }
-                    
-                     ?>
+                    <div class="border p-3 rounded">
+                        <?php
+                        $aulas = $conne->select('aulas', [], 'id_aulas, id_modalidade, dia_sem, horario'); 
+                        foreach ($aulas as $aula) {
+                            $modalidade_info = isset($modalidades[$aula['id_modalidade']]) ? 
+                                            $modalidades[$aula['id_modalidade']] : 
+                                            'Modalidade Desconhecida';
+                            echo '<div class="form-check mb-2">';
+                            echo '<input class="form-check-input" sytle="b"type="checkbox" name="opcoes[]" value="'.$aula['id_aulas'].'" id="aula_'.$aula['id_aulas'].'">';
+                            echo '<label class="form-check-label" for="aula_'.$aula['id_aulas'].'">';
+                            echo htmlspecialchars($modalidade_info . ' - ' . $aula['dia_sem'] . ' às ' . $aula['horario']);
+                            echo '</label>';
+                            echo '</div>';
+                        }
+                        ?>
+                    </div>
                 </div>
-
             </div>
 
             <div class=" d-grid">
@@ -148,7 +150,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             echo "Aluno cadastrado com sucesso!";
                             echo '</div>';
 
-                        } else {
+                        } else if ($result === false) {
                             echo '<div class="alert alert-danger">';
                             echo "Aluno não cadastrado!";
                             echo '</div>';

@@ -49,12 +49,8 @@ foreach ($consult as $modalidade) {
             <div class="d-flex flex-wrap gap-3">
                 <a href="listar_alunos.php" class="btn btn-secondary">👥 Ver Lista de Alunos</a>
                 <a href="cadastrar_aluno.php" class="btn btn-success">➕ Cadastrar Novo Aluno</a>
-                <a href="gerar_aulas.php" class="btn btn-outline-primary">📅 Gerar Aulas do Semestre</a>
-                <!-- Novos Botões -->
                 <a href="relatorio_geral_aluno.php" class="btn btn-info">📊 Relatório Geral por Aluno</a>
                 <a href="visualizar_chamadas.php" class="btn btn-warning">📑 Visualizar Chamadas</a>
-                <a href="exportar_chamada_pdf.php" class="btn btn-danger">📄 Exportar Chamadas (PDF)</a>
-                <a href="exportar_chamada_excel.php" class="btn btn-success">📊 Exportar Chamadas (Excel)</a>
             </div>
         </div>
 

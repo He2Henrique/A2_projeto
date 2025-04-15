@@ -48,7 +48,7 @@ if (isset($_GET['id'])) {
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Editar alunos</h2>
-            <a href="listar_alunos.php" class="btn btn-outline-primary">← Voltar para o Painel</a>
+            <a href="listar_alunos.php" class="btn btn-outline-primary">← Voltar para o lista</a>
         </div>
         <form method="POST" class="card p-4 shadow-sm">
             <div class="row mb-3">
@@ -89,6 +89,7 @@ if (isset($_GET['id'])) {
 
             <div class="d-grid">
                 <button type="submit" class="btn btn-success">Salvar Alterações</button>
+                <a href="editar_aluno_aulas.php" class="btn btn-outline-primary">← Voltar para o Painel</a>
             </div>
         </form>
     </div>
