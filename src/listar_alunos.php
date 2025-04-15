@@ -53,7 +53,6 @@ $alunos = $conn->select('alunos', []); // Select all students from the database
                             </span>
                         </td>
                         <td>
-                            <!-- ia quero ir para pagina editar e mandar id pelo metodo get  -->
                             <a href="editar_aluno.php?id=<?= $aluno['id'] ?>" class="btn btn-warning btn-sm">Editar</a>
                         </td>
                     </tr>

@@ -1,4 +1,6 @@
 <?php
+require_once ('config_serv.php'); // Include the database connection file
+$conn = DatabaseManager::getInstance(); // Create a new instance of the database connection
 //definindo variáveis e funções para o sistema
 $diasSemana = [
     1 => 'Segunda',
@@ -12,6 +14,14 @@ $diasSemana = [
 $data_hoje = date('Y-m-d');
 
 $dia_sem = date('w', strtotime($data_hoje)); // 0 = domingo, 1 = segunda, ..., 6 = sabado
+
+//definido turmas
+$consulta = $conn->select('modalidades', []); // Select all classes from the database
+$turmas = []; // Array to store classes
+foreach ($consulta as $turma) {
+    $turmas[$turma['id']] = $turma['nome'] . ' - ' . $turma['faixa_etaria'];
+}
+
 
 //validar CPF
 function validarCPF(string $cpf): bool

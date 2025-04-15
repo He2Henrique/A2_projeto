@@ -1,4 +1,6 @@
 <?php
+require_once '../Core/core_func.php'; // Incluir funções do núcleo
+require_once '../Core/config_serv.php'; // Incluir configuração do banco de dados
 session_start();
 
 if (!isset($_SESSION['usuario'])) {
@@ -6,38 +8,17 @@ if (!isset($_SESSION['usuario'])) {
     exit;
 }
 
+$conn = DatabaseManager::getInstance(); // Conexão com o banco de dados
 
+$aula = $conn->select('aulas', ['data' => $_GET['id_aula']]); // Selecionar aulas de hoje
+$aula = $aula[0]; // Obter a primeira aula (deve haver apenas uma)
+
+$id_alunos = $conn->select('alunos_aulas', ['id_aulas' => $aula['id_aulas']], 'id_alunos'); // Selecionar alunos da aula
+$alunos =  $conn->select('alunos', ['id' => $id_alunos], 'nome_completo, id'); // Selecionar alunos pelo ID
+
+print_r($alunos); // Exibir alunos para depuração
 // Processar chamada enviada
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_aulas'])) {
-    $id_aula = $_POST['id_aula'];
-    foreach ($_POST['presenca'] as $id_aluno => $status) {
-        $justificativa = $_POST['justificativa'][$id_aluno] ?? null;
-        $stmt = $conn->prepare("INSERT INTO chamada (id_aula, id_aluno, presente, justificativa) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("iiss", $id_aula, $id_aluno, $status, $justificativa);
-        $stmt->execute();
-    }
-    $mensagem = "Chamada registrada com sucesso!";
-}
 
-// Carregar dados da aula
-if (isset($_GET['data']) && isset($_GET['turma']) && isset($_GET['modalidade'])) {
-    $data = $_GET['data'];
-    $turma = $_GET['turma'];
-    $modalidade = $_GET['modalidade'];
-
-    $stmt = $conn->prepare("SELECT * FROM aulas WHERE data = ? AND turma = ? AND modalidade = ? LIMIT 1");
-    $stmt->bind_param("sss", $data, $turma, $modalidade);
-    $stmt->execute();
-    $aula = $stmt->get_result()->fetch_assoc();
-
-    if ($aula) {
-        $id_aula = $aula['id'];
-        $stmt_alunos = $conn->prepare("SELECT * FROM alunos WHERE turma = ? AND modalidade = ? ORDER BY nome_completo ASC");
-        $stmt_alunos->bind_param("ss", $turma, $modalidade);
-        $stmt_alunos->execute();
-        $alunos = $stmt_alunos->get_result()->fetch_all(MYSQLI_ASSOC);
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -57,7 +38,7 @@ if (isset($_GET['data']) && isset($_GET['turma']) && isset($_GET['modalidade']))
         </div>
 
         <h4 class="mb-4">
-            <?= isset($aula) ? date('d/m/Y', strtotime($aula['data'])) . " - Turma " . $aula['turma'] : 'Aula não encontrada' ?>
+            <?= isset($aula) ? date('d/m/Y') . " - Turma " . $turmas[$aula['id_modalidade']] . " das ". $aula['horario'] :  'Aula não encontrada' ?>
         </h4>
 
         <?php if (isset($mensagem)): ?>

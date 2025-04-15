@@ -11,11 +11,6 @@ require_once('../Core/core_func.php'); // Incluindo o arquivo de funções do ba
 
 $conn = DatabaseManager::getInstance(); // Conexão com o banco de dados  // Definição da data de hoje
 
-$consult= $conn->select('modalidades',[]); // Seleciona todas as modalidades
-
-foreach ($consult as $modalidade) {
-    $modalidades[$modalidade['id']] = $modalidade['nome'] . ' - ' . $modalidade['faixa_etaria'];
-}
 // Separar aulas por modalidade
 // $aulas_jiujitsu = $conn->select('aulas', ['modalidade' => 'jiujitsu'], 'data ASC, horario ASC');
 // $aulas_bale = $conn->select('aulas', ['modalidade' => 'bale'], 'data ASC, horario ASC');
@@ -76,10 +71,10 @@ foreach ($consult as $modalidade) {
                         <tr>
                             <td><?= date('d/m/Y') ?></td>
                             <td><?= $aula['dia_sem'] ?></td>
-                            <td><?= $modalidades[$aula['id_modalidade']]?></td>
+                            <td><?= $turmas[$aula['id_modalidade']]?></td>
                             <td><?= $aula['horario']?></td>
                             <td>
-                                <a href="registrar_chamada.php?aula=<?= $aula['id_aulas'] ?>"
+                                <a href="chamada.php?id_aula=<?= $aula['id_aulas'] ?>"
                                     class="btn btn-sm btn-success">Registrar
                                     Chamada</a>
 
