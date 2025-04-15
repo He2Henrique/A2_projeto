@@ -108,6 +108,45 @@
 			return $data;
 		}
 
+		// Método para atualizar dados
+		public function update($table, $data, $conditions) {
+			$set = [];
+			$values = [];
+			
+			foreach ($data as $key => $value) {
+				$set[] = "$key = ?";
+				$values[] = $value;
+			}
+			
+			$sql = "UPDATE $table SET " . implode(", ", $set);
+			
+			if (!empty($conditions)) {
+				$where = [];
+				
+				foreach ($conditions as $key => $value) {
+					$where[] = "$key = ?";
+					$values[] = $value;
+				}
+				
+				$sql .= " WHERE " . implode(" AND ", $where);
+			}
+			
+			$stmt = $this->connection->prepare($sql);
+			
+			if ($stmt === false) {
+				die("Erro na preparação: " . $this->connection->error);
+			}
+			
+			// Tipos de parâmetros (s = string, i = integer, d = double, b = blob)
+			$types = str_repeat('s', count($values));
+			$stmt->bind_param($types, ...$values);
+			
+			$result = $stmt->execute();
+			$stmt->close();
+			
+			return $result;
+		}
+
 		public function lastRecord($table, $id) {
 			$sql = "SELECT * FROM $table ORDER BY $id DESC LIMIT 1";
 			$result = $this->connection->query($sql);

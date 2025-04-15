@@ -19,8 +19,10 @@ $alunos = $conn->select('alunos', []); // Select all students from the database
 
 <body class="bg-light">
     <div class="container mt-5">
-        <h2 class="mb-4">Alunos Cadastrados</h2>
-
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Listar alunos</h2>
+            <a href="main.php" class="btn btn-outline-primary">← Voltar para o Painel</a>
+        </div>
         <?php if (count($alunos) > 0): ?>
         <div class="table-responsive card p-4 shadow-sm">
             <table class="table table-bordered table-striped table-hover">
@@ -33,6 +35,7 @@ $alunos = $conn->select('alunos', []); // Select all students from the database
                         <th>Telefone</th>
                         <th>Email</th>
                         <th>Status</th>
+                        <th>Editar</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -48,6 +51,10 @@ $alunos = $conn->select('alunos', []); // Select all students from the database
                             <span class="badge bg-<?= $aluno['status_'] == 1 ? 'success' : 'secondary' ?>">
                                 <?= $aluno['status_'] == 1 ? 'Ativo' : 'Desativo' ?>
                             </span>
+                        </td>
+                        <td>
+                            <!-- ia quero ir para pagina editar e mandar id pelo metodo get  -->
+                            <a href="editar_aluno.php?id=<?= $aluno['id'] ?>" class="btn btn-warning btn-sm">Editar</a>
                         </td>
                     </tr>
                     <?php endforeach; ?>
