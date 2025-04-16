@@ -4,6 +4,7 @@
 //conexão com o banco de dados
 
 require_once('../Core/config_serv.php'); //incluindo o arquivo config_serv.php
+require_once('../Core/core_func.php'); //incluindo o arquivo core_func.php
 
 //id	nome_completo	nome_soci	data_nas	nome_respon	numero	email	data_matri	
 // numero deve conter apenas 11 char apenas os numeros
@@ -23,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nome_responsavel = $_POST['nome_responsavel'] ?? null;
     $telefone = $_POST['telefone'] ?? null;
     $email = $_POST['email'] ?? null;
-    $data_matricula = $data_hoje; // Data de matrícula é a data atual
+    $data_matricula = $data_hojebd; // Data de matrícula é a data atual
 
     $result = $conne->insert('alunos', [
         'nome_completo' => $nome,

@@ -11,10 +11,6 @@ require_once('../Core/core_func.php'); // Incluindo o arquivo de funções do ba
 
 $conn = DatabaseManager::getInstance(); // Conexão com o banco de dados  // Definição da data de hoje
 
-// Separar aulas por modalidade
-// $aulas_jiujitsu = $conn->select('aulas', ['modalidade' => 'jiujitsu'], 'data ASC, horario ASC');
-// $aulas_bale = $conn->select('aulas', ['modalidade' => 'bale'], 'data ASC, horario ASC');
-// gerar depois as aulas
 
 ?>
 
@@ -65,11 +61,12 @@ $conn = DatabaseManager::getInstance(); // Conexão com o banco de dados  // Def
                     </thead>
                     <tbody>
                         <?php
+                            print_r($diasSemana[$dia_sem]);
                             $aulas_hoje = $conn->select('aulas', ['dia_sem' => $diasSemana[$dia_sem]], 'id_aulas, id_modalidade, dia_sem, horario');
                         ?>
                         <?php foreach($aulas_hoje as $aula): ?>
                         <tr>
-                            <td><?= date('d/m/Y') ?></td>
+                            <td><?= $data_hojeFront ?></td>
                             <td><?= $aula['dia_sem'] ?></td>
                             <td><?= $turmas[$aula['id_modalidade']]?></td>
                             <td><?= $aula['horario']?></td>

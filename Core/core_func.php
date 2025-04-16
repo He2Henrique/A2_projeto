@@ -2,6 +2,7 @@
 require_once ('config_serv.php'); // Include the database connection file
 $conn = DatabaseManager::getInstance(); // Create a new instance of the database connection
 //definindo variáveis e funções para o sistema
+date_default_timezone_set('America/Sao_Paulo');
 $diasSemana = [
     1 => 'Segunda',
     2 => 'Terça',
@@ -10,10 +11,10 @@ $diasSemana = [
     5 => 'Sexta',
     6 => 'Sábado'
 ];
-
-$data_hoje = date('Y-m-d');
-
-$dia_sem = date('w', strtotime($data_hoje)); // 0 = domingo, 1 = segunda, ..., 6 = sabado
+$data_hojebd = date('Y-m-d');//para o banco de dados
+$data_hojeFront = date('d/m/Y', strtotime($data_hojebd)); // para exibir no front-end
+$dia_sem = date('w', strtotime($data_hojebd)); // 0 = domingo, 1 = segunda, ..., 6 = sabado
+$horario = date('H:i:s'); // Horário atual no formato HH:MM:SS
 
 //definido turmas
 $consulta = $conn->select('modalidades', []); // Select all classes from the database

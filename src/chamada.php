@@ -10,14 +10,57 @@ if (!isset($_SESSION['usuario'])) {
 
 $conn = DatabaseManager::getInstance(); // Conexão com o banco de dados
 
-$aula = $conn->select('aulas', ['data' => $_GET['id_aula']]); // Selecionar aulas de hoje
-$aula = $aula[0]; // Obter a primeira aula (deve haver apenas uma)
+$id_aula = $_GET['id_aula'] ?? null; // Obter o ID da aula da URL
 
-$id_alunos = $conn->select('alunos_aulas', ['id_aulas' => $aula['id_aulas']], 'id_alunos'); // Selecionar alunos da aula
-$alunos =  $conn->select('alunos', ['id' => $id_alunos], 'nome_completo, id'); // Selecionar alunos pelo ID
+if (isset($id_aula)) {
 
-print_r($alunos); // Exibir alunos para depuração
-// Processar chamada enviada
+    $aula = $conn->select('aulas', ['id_aulas' => $id_aula]);
+    $aula = $aula[0]; // Obter a primeira aula (deve haver apenas uma)
+
+    $id_alunos = $conn->select('alunos_aulas', ['id_aulas' => $aula['id_aulas']], 'id_alunos');
+    foreach($id_alunos as $id){
+        $resultado = $conn->select('alunos', ['id' => $id['id_alunos']], 'nome_completo, id');
+        $alunos[] = $resultado[0]; // Adiciona o ID do aluno ao array
+    }
+    
+    
+} 
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_aula)) {
+
+    $campos = ['data_'=> $data_hojebd,'id_aula'=>$id_aula, 'hora'=> $horario];
+    $conn->insert('ocorrencia',$campos);
+
+    $ultimo_registro = $conn->lastRecord('ocorrencia', 'id'); // Inserir justificativa na tabela ocorrencia
+    foreach ($alunos as $aluno) {
+        $presenca = $_POST['presenca'][$aluno['id']];
+        if($presenca == 'ausente'){
+            $justificativa = $_POST['justificativa'][$aluno['id']] ?? null;
+            if($justificativa){
+                $presenca = $justificativa;
+            }
+        }
+
+        $campos = [
+            'id_aluno' => $aluno['id'],
+            'id_ocorrencia' => $ultimo_registro['id'],
+            'presença' => $presenca
+        ];
+
+        $result = $conn->insert('chamada', $campos);
+        if ($result) {
+            $mensagem = "Chamada registrada com sucesso!";
+        } else {
+            $mensagem = "Erro ao registrar chamada.";
+        }
+    }
+    echo "<script> alert('$mensagem'); window.location.href = 'main.php'; </script>";
+exit;
+    
+}
+
+
 
 ?>
 
@@ -34,11 +77,11 @@ print_r($alunos); // Exibir alunos para depuração
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Registrar Chamada</h2>
-            <a href="painel_professor.php" class="btn btn-outline-primary">← Voltar para o Painel</a>
+            <a href="main.php" class="btn btn-outline-primary">← Voltar para o Painel</a>
         </div>
 
         <h4 class="mb-4">
-            <?= isset($aula) ? date('d/m/Y') . " - Turma " . $turmas[$aula['id_modalidade']] . " das ". $aula['horario'] :  'Aula não encontrada' ?>
+            <?= isset($aula) ? $data_hojeFront . " - Turma " . $turmas[$aula['id_modalidade']] . " das ". $aula['horario'] :  'Aula não encontrada' ?>
         </h4>
 
         <?php if (isset($mensagem)): ?>
@@ -47,7 +90,7 @@ print_r($alunos); // Exibir alunos para depuração
 
         <?php if (!empty($alunos)): ?>
         <form method="POST" class="card p-4 shadow-sm">
-            <input type="hidden" name="id_aula" value="<?= $id_aula ?>">
+            <input type="hidden" name="id_aula" value="<?= $aula['id_aulas'] ?>">
             <table class="table table-bordered">
                 <thead class="table-dark">
                     <tr>

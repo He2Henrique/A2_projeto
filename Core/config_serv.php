@@ -108,6 +108,7 @@
 			return $data;
 		}
 
+
 		// Método para atualizar dados
 		public function update($table, $data, $conditions) {
 			$set = [];
