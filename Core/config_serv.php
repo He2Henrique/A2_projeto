@@ -54,6 +54,9 @@
 			'email' => 'joao@example.com',
 			'idade' => 30
 		];*/
+		/*$var = [
+		'nome_coluna'=> 'valor',...] */
+		
 		// Método para inserir dados
 		public function insert($table, $data) {
 			$columns = implode(", ", array_keys($data));

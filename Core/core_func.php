@@ -18,9 +18,9 @@ $horario = date('H:i:s'); // Horário atual no formato HH:MM:SS
 
 //definido turmas
 $consulta = $conn->select('modalidades', []); // Select all classes from the database
-$turmas = []; // Array to store classes
+$TURMAS = []; // Array to store classes
 foreach ($consulta as $turma) {
-    $turmas[$turma['id']] = $turma['nome'] . ' - ' . $turma['faixa_etaria'];
+    $TURMAS[$turma['id']] = $turma['nome'] . ' - ' . $turma['faixa_etaria'];
 }
 
 

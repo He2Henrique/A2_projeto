@@ -6,7 +6,8 @@ require_once ('../Core/config_serv.php'); // Include the database connection fil
 $conn = DatabaseManager::getInstance(); // Create a new instance of the database connection
 
 $alunos = $conn->select('alunos', []); // Select all students from the database
-
+$turmas = $conn->select('alunos_aulas', [], 'id_alunos, id_aulas'); // Select all classes from the database
+$aulas = $conn->select('aulas', [], 'id_aulas,id_modalidade'); // Select all classes from the database
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -34,6 +35,7 @@ $alunos = $conn->select('alunos', []); // Select all students from the database
                         <th>Nome do responsavel</th>
                         <th>Telefone</th>
                         <th>Email</th>
+                        <th>turmas</th>
                         <th>Status</th>
                         <th>Editar</th>
                     </tr>
@@ -47,6 +49,19 @@ $alunos = $conn->select('alunos', []); // Select all students from the database
                         <td><?= $aluno['nome_respon'] == null ? $aluno['nome_respon'] : "Não possui" ?></td>
                         <td><?= $aluno['numero'] ?></td>
                         <td><?= $aluno['email'] ?></td>
+                        <td><?php 
+                            $matriculadas = "";
+                            foreach($turmas as $turma){
+                                if($turma['id_alunos'] == $aluno['id']){
+                                    foreach($aulas as $aula){
+                                        if($turma['id_aulas'] == $aula['id_aulas']){
+                                            $matriculadas = $matriculadas . $TURMAS[$aula['id_modalidade']] . ", ";
+                                        }
+                                    }
+                                }
+                            }
+                            echo $matriculadas == "" ? "Nenhuma turma matriculada" : $matriculadas;
+                        ?></td>
                         <td>
                             <span class="badge bg-<?= $aluno['status_'] == 1 ? 'success' : 'secondary' ?>">
                                 <?= $aluno['status_'] == 1 ? 'Ativo' : 'Desativo' ?>
