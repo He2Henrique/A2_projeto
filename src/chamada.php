@@ -1,6 +1,5 @@
 <?php
-require_once '../Core/core_func.php'; // Incluir funções do núcleo
-require_once '../Core/config_serv.php'; // Incluir configuração do banco de dados
+require_once '../Dependence/self/depedencias.php';
 session_start();
 
 if (!isset($_SESSION['usuario'])) {
@@ -57,11 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_aula)) {
     }
     echo "<script> alert('$mensagem'); window.location.href = 'main.php'; </script>";
 exit;
-    
+
 }
-
-
-
 ?>
 
 <!DOCTYPE html>
@@ -81,7 +77,7 @@ exit;
         </div>
 
         <h4 class="mb-4">
-            <?= isset($aula) ? $data_hojeFront . " - Turma " . $turmas[$aula['id_modalidade']] . " das ". $aula['horario'] :  'Aula não encontrada' ?>
+            <?= isset($aula) ? $data_hojeFront . " - Turma " . $MODALIDADES[$aula['id_modalidade']] . " das ". $aula['horario'] :  'Aula não encontrada' ?>
         </h4>
 
         <?php if (isset($mensagem)): ?>
@@ -91,14 +87,12 @@ exit;
         <?php if (!empty($alunos)): ?>
         <form method="POST" class="card p-4 shadow-sm">
             <input type="hidden" name="id_aula" value="<?= $aula['id_aulas'] ?>">
+
             <table class="table table-bordered">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Aluno</th>
-                        <th>Presença</th>
-                        <th>Justificativa (se ausente)</th>
-                    </tr>
-                </thead>
+                <?php 
+                    $table = new TableBuilder;
+                    echo $table->criar_Header(['Aluno', 'Presença', 'Justificativa (se ausente)'], "table-dark");
+                ?>
                 <tbody>
                     <?php foreach ($alunos as $aluno): ?>
                     <tr>

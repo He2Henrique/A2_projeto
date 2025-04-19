@@ -1,13 +1,20 @@
 <?php
 
-require_once ('../Core/core_func.php'); // Include the database connection file
-require_once ('../Core/config_serv.php'); // Include the database connection file
+require_once '../Dependence/self/depedencias.php';
 
 $conn = DatabaseManager::getInstance(); // Create a new instance of the database connection
 
 $alunos = $conn->select('alunos', []); // Select all students from the database
 $turmas = $conn->select('alunos_aulas', [], 'id_alunos, id_aulas'); // Select all classes from the database
 $aulas = $conn->select('aulas', [], 'id_aulas,id_modalidade'); // Select all classes from the database
+
+$matriz = [];
+foreach ($alunos as $aluno){
+    $nome_soci = $aluno['nome_soci'] == null ? "Não possui" : $aluno['nome_soci'];
+    $nome_respon = $aluno['nome_respon'] == null ? "Não possui" : $aluno['nome_respon'];
+    $linha = [$aluno['nome_completo'], $nome_soci, Idade($aluno['data_nas']), $nome_respon, $aluno['numero'], $aluno['email']];
+    $matriz[] = $linha;
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -26,53 +33,38 @@ $aulas = $conn->select('aulas', [], 'id_aulas,id_modalidade'); // Select all cla
         </div>
         <?php if (count($alunos) > 0): ?>
         <div class="table-responsive card p-4 shadow-sm">
-            <table class="table table-bordered table-striped table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Nome completo</th>
-                        <th>Nome social</th>
-                        <th>Idade</th>
-                        <th>Nome do responsavel</th>
-                        <th>Telefone</th>
-                        <th>Email</th>
-                        <th>turmas</th>
-                        <th>Status</th>
-                        <th>Editar</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($alunos as $aluno): ?>
-                    <tr>
-                        <td><?= $aluno['nome_completo'] ?></td>
-                        <td><?= $aluno['nome_soci'] == null ? $aluno['nome_soci'] : "Não possui" ?></td>
-                        <td><?= Idade($aluno['data_nas']) ?></td>
-                        <td><?= $aluno['nome_respon'] == null ? $aluno['nome_respon'] : "Não possui" ?></td>
-                        <td><?= $aluno['numero'] ?></td>
-                        <td><?= $aluno['email'] ?></td>
-                        <td><?php 
-                            $matriculadas = "";
-                            foreach($turmas as $turma){
-                                if($turma['id_alunos'] == $aluno['id']){
-                                    foreach($aulas as $aula){
-                                        if($turma['id_aulas'] == $aula['id_aulas']){
-                                            $matriculadas = $matriculadas . $TURMAS[$aula['id_modalidade']] . ", ";
-                                        }
-                                    }
+            <?php
+                $table = new TableBuilder;
+                $table->criar_Header(['Nome completo', 'Nome social', 'Idade', 'Nome do responsavel', 'Telefone', 'Email', 'Turmas', 'Status', 'Editar'], "table-dark");
+                $table->definir_corpo($matriz,1);
+                $result = $table->criar_tabela("table table-bordered table-striped table-hover");
+                echo $result;
+
+            ?>
+            <!-- completando tabela -->
+            <td><?php 
+                    $matriculadas = "";
+                    foreach($turmas as $turma){
+                        if($turma['id_alunos'] == $aluno['id']){
+                            foreach($aulas as $aula){
+                                if($turma['id_aulas'] == $aula['id_aulas']){
+                                    $matriculadas = $matriculadas . $MODALIDADES[$aula['id_modalidade']] . ", ";
                                 }
                             }
-                            echo $matriculadas == "" ? "Nenhuma turma matriculada" : $matriculadas;
-                        ?></td>
-                        <td>
-                            <span class="badge bg-<?= $aluno['status_'] == 1 ? 'success' : 'secondary' ?>">
-                                <?= $aluno['status_'] == 1 ? 'Ativo' : 'Desativo' ?>
-                            </span>
-                        </td>
-                        <td>
-                            <a href="editar_aluno.php?id=<?= $aluno['id'] ?>" class="btn btn-warning btn-sm">Editar</a>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
+                        }
+                    }
+                    echo $matriculadas == "" ? "Nenhuma turma matriculada" : $matriculadas;
+                ?></td>
+            <td>
+                <span class="badge bg-<?= $aluno['status_'] == 1 ? 'success' : 'secondary' ?>">
+                    <?= $aluno['status_'] == 1 ? 'Ativo' : 'Desativo' ?>
+                </span>
+            </td>
+            <td>
+                <a href="editar_aluno.php?id=<?= $aluno['id'] ?>" class="btn btn-warning btn-sm">Editar</a>
+            </td>
+            </tr>
+            </tbody>
             </table>
         </div>
         <?php else: ?>
