@@ -8,10 +8,12 @@ $alunos = $conn->select('alunos', []); // Select all students from the database
 $turmas = $conn->select('alunos_aulas', [], 'id_alunos, id_aulas'); // Select all classes from the database
 $aulas = $conn->select('aulas', [], 'id_aulas,id_modalidade'); // Select all classes from the database
 
+
+
 $matriz = [];
 foreach ($alunos as $aluno){
-    $nome_soci = $aluno['nome_soci'] == null ? "Não possui" : $aluno['nome_soci'];
-    $nome_respon = $aluno['nome_respon'] == null ? "Não possui" : $aluno['nome_respon'];
+    $nome_soci = ($aluno['nome_soci'] == null || '') ? "Não possui" : $aluno['nome_soci'];
+    $nome_respon = ($aluno['nome_respon'] == null || '')? "Não possui" : $aluno['nome_respon'];
     $linha = [$aluno['nome_completo'], $nome_soci, Idade($aluno['data_nas']), $nome_respon, $aluno['numero'], $aluno['email']];
     $matriz[] = $linha;
 }

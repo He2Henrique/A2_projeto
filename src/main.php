@@ -11,13 +11,16 @@ require_once '../Dependence/self/depedencias.php'; // Inclui as dependências ne
 $conn = DatabaseManager::getInstance(); // Conexão com o banco de dados  // Definição da data de hoje
 $aulas_hoje = $conn->select('aulas', ['dia_sem' => $SEMANA[$DIA_SEM]], 'id_aulas, id_modalidade, dia_sem, horario');
 
-
-$matriz = [];
-foreach ($aulas_hoje as $aula) {
-    $button = CriarButao('chamada.php?id_aula=' . $aula['id_aulas'], 'Registrar Chamada', 'btn btn-sm btn-success');
-    $linha = [$DATA_DMY, $aula['dia_sem'], $MODALIDADES[$aula['id_modalidade']], $aula['horario'], $button];
-    $matriz[] = $linha;
+$tem = !empty($aulas_hoje);
+if($tem) {
+    $matriz = [];
+    foreach ($aulas_hoje as $aula) {
+        $button = CriarButao('chamada.php?id_aula=' . $aula['id_aulas'], 'Registrar Chamada', 'btn btn-sm btn-success');
+        $linha = [$DATA_DMY, $aula['dia_sem'], $MODALIDADES[$aula['id_modalidade']], $aula['horario'], $button];
+        $matriz[] = $linha;
+    }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -56,11 +59,16 @@ foreach ($aulas_hoje as $aula) {
             <h5 class="mb-3">Aulas de hoje</h5>
             <div class="table-responsive">
                 <?php
-                    $Table = new TableBuilder;
-                    $Table->criar_Header(['Data', 'Dia', 'Turma', 'Horário', 'Ações'], "table-dark");
-                    $Table->definir_corpo($matriz);
-                    $result = $Table->criar_tabela("table table-hover table-bordered");
-                    echo $result;
+                    if ($tem){
+                        $Table = new TableBuilder;
+                        $Table->criar_Header(['Data', 'Dia', 'Modalidade', 'Horário', 'Ações'], "table-dark");
+                        $Table->definir_corpo($matriz);
+                        $result = $Table->criar_tabela("table table-hover table-bordered");
+                        echo $result;
+                    } else {
+                        echo "<div class='alert alert-warning'>Nenhuma aula programada para hoje.</div>";
+                    }
+                    
                 ?>
             </div>
         </div>
