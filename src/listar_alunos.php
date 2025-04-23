@@ -5,16 +5,32 @@ require_once '../Dependence/self/depedencias.php';
 $conn = DatabaseManager::getInstance(); // Create a new instance of the database connection
 
 $alunos = $conn->select('alunos', []); // Select all students from the database
-$turmas = $conn->select('alunos_aulas', [], 'id_alunos, id_aulas'); // Select all classes from the database
-$aulas = $conn->select('aulas', [], 'id_aulas,id_modalidade'); // Select all classes from the database
-
-
+$turmas = $conn->selectJoin('alunos_aulas','aulas','alunos_aulas.id_aulas = aulas.id_aulas',[] ); 
 
 $matriz = [];
 foreach ($alunos as $aluno){
     $nome_soci = ($aluno['nome_soci'] == null || '') ? "Não possui" : $aluno['nome_soci'];
     $nome_respon = ($aluno['nome_respon'] == null || '')? "Não possui" : $aluno['nome_respon'];
-    $linha = [$aluno['nome_completo'], $nome_soci, Idade($aluno['data_nas']), $nome_respon, $aluno['numero'], $aluno['email']];
+    $matriculadas = "";
+    // Ta muito ruim essa parte podemos melhorar isso depois, mas por enquanto ta funcionando.
+    foreach($turmas as $turma){
+        if($turma['id_alunos'] == $aluno['id']){
+            
+            $matriculadas = $matriculadas . $MODALIDADES[$turma['id_modalidade']] . $turma['dia_sem'] . $turma['horario'] . "<br>";
+                
+        }
+    }
+    $matriculadas == "" ? "Nenhuma turma matriculada" : $matriculadas;
+
+    $status = ($aluno['status_'] == 1 ? 'Ativo' : 'Desativo');
+    $span = '<span class="badge bg-' . ($status == 'Ativo' ? 'success' : 'secondary') . '">' . $status . '</span>';
+    $btn = CriarButao('editar_aluno.php?id=' . $aluno['id'], 'Editar', 'btn btn-warning btn-sm');
+
+
+    $linha = [$aluno['nome_completo'], $nome_soci, Idade($aluno['data_nas']), $nome_respon, $aluno['numero'],
+    $aluno['email'],$matriculadas, $span, $btn];
+    
+
     $matriz[] = $linha;
 }
 ?>
@@ -43,31 +59,6 @@ foreach ($alunos as $aluno){
                 echo $result;
 
             ?>
-            <!-- completando tabela -->
-            <td><?php 
-                    $matriculadas = "";
-                    foreach($turmas as $turma){
-                        if($turma['id_alunos'] == $aluno['id']){
-                            foreach($aulas as $aula){
-                                if($turma['id_aulas'] == $aula['id_aulas']){
-                                    $matriculadas = $matriculadas . $MODALIDADES[$aula['id_modalidade']] . ", ";
-                                }
-                            }
-                        }
-                    }
-                    echo $matriculadas == "" ? "Nenhuma turma matriculada" : $matriculadas;
-                ?></td>
-            <td>
-                <span class="badge bg-<?= $aluno['status_'] == 1 ? 'success' : 'secondary' ?>">
-                    <?= $aluno['status_'] == 1 ? 'Ativo' : 'Desativo' ?>
-                </span>
-            </td>
-            <td>
-                <a href="editar_aluno.php?id=<?= $aluno['id'] ?>" class="btn btn-warning btn-sm">Editar</a>
-            </td>
-            </tr>
-            </tbody>
-            </table>
         </div>
         <?php else: ?>
         <div class="alert alert-info">Nenhum aluno cadastrado ainda.</div>

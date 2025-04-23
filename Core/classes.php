@@ -1,5 +1,5 @@
 <?php
-require_once ('config_serv.php');
+require_once '../Dependence/self/depedencias.php'; // Include the dependencies
 
 
 //definindo classes 

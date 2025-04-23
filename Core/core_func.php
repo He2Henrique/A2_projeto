@@ -1,7 +1,7 @@
 <?php
-require_once ('config_serv.php'); // Include the database connection file
-require_once ('classes.php'); // Include the classes file
-$conn = DatabaseManager::getInstance(); // Create a new instance of the database connection
+require_once '../Dependence/self/depedencias.php'; // Include the dependencies
+
+$conn = DatabaseManager::getInstance();
 //definindo variáveis e funções para o sistema
 date_default_timezone_set('America/Sao_Paulo');
 

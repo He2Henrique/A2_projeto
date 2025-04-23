@@ -22,7 +22,6 @@ if($tem) {
 }
 
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-br">
 
