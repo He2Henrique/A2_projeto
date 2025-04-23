@@ -1,6 +1,5 @@
 <?php
-require_once('../Core/config_serv.php'); // Include the database connection file
-require_once('../Core/core_func.php'); // Include the core functions file
+require_once '../Dependence/self/depedencias.php';// Include the core functions file
 session_start();
 
 if (!isset($_SESSION['usuario'])) {

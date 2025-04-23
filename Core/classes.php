@@ -1,4 +1,7 @@
 <?php
+require_once '../Dependence/self/depedencias.php'; // Include the dependencies
+
+
 //definindo classes 
 // Defining classes
 class alunos{
@@ -33,4 +36,33 @@ class alunos{
         $value = sprintf("('%s', '%s', '%s', '%s')", $this->nome, $this->dataNas, $this->cpf, $this->curso);
         return $this->cpf;
     }
+}
+
+
+class Modalidades{
+
+    private static $modalidades = [];
+
+    
+    private static function busca_modalidades() {
+        $conn = DatabaseManager::getInstance();
+        $consulta = $conn->select('modalidades', []); // seleciona todas as modalidades do banco de dados
+        foreach ($consulta as $modalidade) {
+            self::$modalidades[$modalidade['id']] = $modalidade['nome'] . ' - ' . $modalidade['faixa_etaria'];
+        }
+    }
+
+    public static function getModalidades() {
+        if (empty(self::$modalidades)) {
+            self::busca_modalidades();
+        }
+        return self::$modalidades;
+    }
+
+    public function getModalidade_byid($id){
+        return self::$modalidades[$id];
+    }
+
+
+
 }

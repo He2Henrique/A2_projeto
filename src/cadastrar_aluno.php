@@ -1,10 +1,6 @@
 <?php
 
-//lembrar de fazer validação de dados para evitar SQL Injection
-//conexão com o banco de dados
-
-require_once('../Core/config_serv.php'); //incluindo o arquivo config_serv.php
-require_once('../Core/core_func.php'); //incluindo o arquivo core_func.php
+require_once '../Dependence/self/depedencias.php';
 
 //id	nome_completo	nome_soci	data_nas	nome_respon	numero	email	data_matri	
 // numero deve conter apenas 11 char apenas os numeros

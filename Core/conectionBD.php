@@ -54,6 +54,9 @@
 			'email' => 'joao@example.com',
 			'idade' => 30
 		];*/
+		/*$var = [
+		'nome_coluna'=> 'valor',...] */
+		
 		// Método para inserir dados
 		public function insert($table, $data) {
 			$columns = implode(", ", array_keys($data));
@@ -80,6 +83,37 @@
 		// Método para selecionar dados
 		public function select($table, $conditions = [], $columns = '*') {
 			$sql = "SELECT $columns FROM $table";
+			
+			if (!empty($conditions)) {
+				$where = [];
+				$values = [];
+				
+				foreach ($conditions as $key => $value) {
+					$where[] = "$key = ?";
+					$values[] = $value;
+				}
+				
+				$sql .= " WHERE " . implode(" AND ", $where);
+			}
+			
+			$stmt = $this->connection->prepare($sql);
+			
+			if (!empty($conditions)) {
+				$types = str_repeat('s', count($values));
+				$stmt->bind_param($types, ...$values);
+			}
+			
+			$stmt->execute();
+			$result = $stmt->get_result();
+			$data = $result->fetch_all(MYSQLI_ASSOC);
+			$stmt->close();
+			
+			return $data;
+		}
+
+		// metodo para selcionar com join
+		public function selectJoin($table1, $table2, $on, $conditions = [], $columns = '*') {
+			$sql = "SELECT $columns FROM $table1 INNER JOIN $table2 ON $on";
 			
 			if (!empty($conditions)) {
 				$where = [];

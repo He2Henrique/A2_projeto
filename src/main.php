@@ -5,15 +5,23 @@ if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");//evitar que o usuario acesse a pagina sem estar logado
     exit;
 }
-require_once('../Core/config_serv.php'); // Incluindo o arquivo de configuração do banco de dados
-require_once('../Core/core_func.php'); // Incluindo o arquivo de funções do banco de dados
+require_once '../Dependence/self/depedencias.php'; // Inclui as dependências necessárias
 
 
 $conn = DatabaseManager::getInstance(); // Conexão com o banco de dados  // Definição da data de hoje
+$aulas_hoje = $conn->select('aulas', ['dia_sem' => $SEMANA[$DIA_SEM]], 'id_aulas, id_modalidade, dia_sem, horario');
 
+$tem = !empty($aulas_hoje);
+if($tem) {
+    $matriz = [];
+    foreach ($aulas_hoje as $aula) {
+        $button = CriarButao('chamada.php?id_aula=' . $aula['id_aulas'], 'Registrar Chamada', 'btn btn-sm btn-success');
+        $linha = [$DATA_DMY, $aula['dia_sem'], $MODALIDADES[$aula['id_modalidade']], $aula['horario'], $button];
+        $matriz[] = $linha;
+    }
+}
 
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -49,37 +57,18 @@ $conn = DatabaseManager::getInstance(); // Conexão com o banco de dados  // Def
         <div class="card p-4 shadow-sm mb-4">
             <h5 class="mb-3">Aulas de hoje</h5>
             <div class="table-responsive">
-                <table class="table table-hover table-bordered">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Data</th>
-                            <th>Dia</th>
-                            <th>Turma</th>
-                            <th>Horário</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                            print_r($diasSemana[$dia_sem]);
-                            $aulas_hoje = $conn->select('aulas', ['dia_sem' => $diasSemana[$dia_sem]], 'id_aulas, id_modalidade, dia_sem, horario');
-                        ?>
-                        <?php foreach($aulas_hoje as $aula): ?>
-                        <tr>
-                            <td><?= $data_hojeFront ?></td>
-                            <td><?= $aula['dia_sem'] ?></td>
-                            <td><?= $turmas[$aula['id_modalidade']]?></td>
-                            <td><?= $aula['horario']?></td>
-                            <td>
-                                <a href="chamada.php?id_aula=<?= $aula['id_aulas'] ?>"
-                                    class="btn btn-sm btn-success">Registrar
-                                    Chamada</a>
-
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                <?php
+                    if ($tem){
+                        $Table = new TableBuilder;
+                        $Table->criar_Header(['Data', 'Dia', 'Modalidade', 'Horário', 'Ações'], "table-dark");
+                        $Table->definir_corpo($matriz);
+                        $result = $Table->criar_tabela("table table-hover table-bordered");
+                        echo $result;
+                    } else {
+                        echo "<div class='alert alert-warning'>Nenhuma aula programada para hoje.</div>";
+                    }
+                    
+                ?>
             </div>
         </div>
     </div>

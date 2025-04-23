@@ -1,12 +1,38 @@
 <?php
 
-require_once ('../Core/core_func.php'); // Include the database connection file
-require_once ('../Core/config_serv.php'); // Include the database connection file
+require_once '../Dependence/self/depedencias.php';
 
 $conn = DatabaseManager::getInstance(); // Create a new instance of the database connection
 
 $alunos = $conn->select('alunos', []); // Select all students from the database
+$turmas = $conn->selectJoin('alunos_aulas','aulas','alunos_aulas.id_aulas = aulas.id_aulas',[] ); 
 
+$matriz = [];
+foreach ($alunos as $aluno){
+    $nome_soci = ($aluno['nome_soci'] == null || '') ? "Não possui" : $aluno['nome_soci'];
+    $nome_respon = ($aluno['nome_respon'] == null || '')? "Não possui" : $aluno['nome_respon'];
+    $matriculadas = "";
+    // Ta muito ruim essa parte podemos melhorar isso depois, mas por enquanto ta funcionando.
+    foreach($turmas as $turma){
+        if($turma['id_alunos'] == $aluno['id']){
+            
+            $matriculadas = $matriculadas . $MODALIDADES[$turma['id_modalidade']] . $turma['dia_sem'] . $turma['horario'] . "<br>";
+                
+        }
+    }
+    $matriculadas == "" ? "Nenhuma turma matriculada" : $matriculadas;
+
+    $status = ($aluno['status_'] == 1 ? 'Ativo' : 'Desativo');
+    $span = '<span class="badge bg-' . ($status == 'Ativo' ? 'success' : 'secondary') . '">' . $status . '</span>';
+    $btn = CriarButao('editar_aluno.php?id=' . $aluno['id'], 'Editar', 'btn btn-warning btn-sm');
+
+
+    $linha = [$aluno['nome_completo'], $nome_soci, Idade($aluno['data_nas']), $nome_respon, $aluno['numero'],
+    $aluno['email'],$matriculadas, $span, $btn];
+    
+
+    $matriz[] = $linha;
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -25,40 +51,14 @@ $alunos = $conn->select('alunos', []); // Select all students from the database
         </div>
         <?php if (count($alunos) > 0): ?>
         <div class="table-responsive card p-4 shadow-sm">
-            <table class="table table-bordered table-striped table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Nome completo</th>
-                        <th>Nome social</th>
-                        <th>Idade</th>
-                        <th>Nome do responsavel</th>
-                        <th>Telefone</th>
-                        <th>Email</th>
-                        <th>Status</th>
-                        <th>Editar</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($alunos as $aluno): ?>
-                    <tr>
-                        <td><?= $aluno['nome_completo'] ?></td>
-                        <td><?= $aluno['nome_soci'] == null ? $aluno['nome_soci'] : "Não possui" ?></td>
-                        <td><?= Idade($aluno['data_nas']) ?></td>
-                        <td><?= $aluno['nome_respon'] == null ? $aluno['nome_respon'] : "Não possui" ?></td>
-                        <td><?= $aluno['numero'] ?></td>
-                        <td><?= $aluno['email'] ?></td>
-                        <td>
-                            <span class="badge bg-<?= $aluno['status_'] == 1 ? 'success' : 'secondary' ?>">
-                                <?= $aluno['status_'] == 1 ? 'Ativo' : 'Desativo' ?>
-                            </span>
-                        </td>
-                        <td>
-                            <a href="editar_aluno.php?id=<?= $aluno['id'] ?>" class="btn btn-warning btn-sm">Editar</a>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+            <?php
+                $table = new TableBuilder;
+                $table->criar_Header(['Nome completo', 'Nome social', 'Idade', 'Nome do responsavel', 'Telefone', 'Email', 'Turmas', 'Status', 'Editar'], "table-dark");
+                $table->definir_corpo($matriz,1);
+                $result = $table->criar_tabela("table table-bordered table-striped table-hover");
+                echo $result;
+
+            ?>
         </div>
         <?php else: ?>
         <div class="alert alert-info">Nenhum aluno cadastrado ainda.</div>
