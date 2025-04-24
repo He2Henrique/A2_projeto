@@ -1,5 +1,5 @@
 <?php
-
+namespace App\Core;
 //criando classe de serviço para criar tabelas HTML
 class TableBuilder {
     private string $header;

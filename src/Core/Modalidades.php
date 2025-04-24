@@ -1,6 +1,10 @@
 <?php
 
-require_once 'DatabaseManager.php';
+namespace App\Core; // Define the namespace for the classes
+
+// quando se usa namespace, é necessário importar as classes que serão utilizadas
+use App\Core\DatabaseManager; // Import the DatabaseManager class
+use DateTime;
 
 class Modalidades{
 
@@ -22,7 +26,11 @@ class Modalidades{
         return self::$modalidades;
     }
 
-    public function getModalidade_byid($id){
+    public static function getModalidade_byid($id){
+        if (empty(self::$modalidades)) {
+            self::busca_modalidades();
+        }
+
         return self::$modalidades[$id];
     }
 

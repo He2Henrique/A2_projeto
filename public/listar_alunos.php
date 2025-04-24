@@ -1,14 +1,17 @@
 <?php
-require_once '../Core/DatabaseManager.php';
-require_once '../Core/ProcessData.php';
+require_once __DIR__.'/../vendor/autoload.php';
+use App\Core\DatabaseManager;
+use App\Core\ProcessData;
+
 $conn = DatabaseManager::getInstance();
 $processData = new ProcessData();
 
 $busca = $_GET['busca'] ?? '';
 
-// Consulta com filtro
+
+
 if (!empty($busca)) {
-    $alunos = $conn->query("SELECT * FROM alunos WHERE nome_completo LIKE ?", ["%$busca%"]);
+    $alunos = $conn->select('alunos', ['nome_completo LIKE' => "%$busca%"]);
 } else {
     $alunos = $conn->select('alunos', []);
 }
@@ -62,7 +65,11 @@ if (!empty($busca)) {
                     <tr>
                         <td><?= htmlspecialchars($aluno['nome_completo']) ?></td>
                         <td><?= $aluno['nome_soci'] ?? 'Não possui' ?></td>
+<<<<<<< HEAD:src/listar_alunos.php
                         <td><?= $processData->Idade($aluno['data_nas']) ?></td>
+=======
+                        <td><?= ProcessData::Idade($aluno['data_nas']) ?></td>
+>>>>>>> Acoplando_arquivos:public/listar_alunos.php
                         <td><?= $aluno['nome_respon'] ?? 'Não possui' ?></td>
                         <td><?= htmlspecialchars($aluno['numero']) ?></td>
                         <td><?= htmlspecialchars($aluno['email']) ?></td>

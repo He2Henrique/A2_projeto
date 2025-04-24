@@ -1,6 +1,6 @@
 <?php
-
-require_once '../Core/DatabaseManager.php';
+require_once __DIR__.'/../vendor/autoload.php';
+use App\Core\DatabaseManager; // Importando a classe DatabaseManager
 
 //id	nome_completo	nome_soci	data_nas	nome_respon	numero	email	data_matri	
 // numero deve conter apenas 11 char apenas os numeros

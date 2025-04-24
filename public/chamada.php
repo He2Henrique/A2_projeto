@@ -1,7 +1,7 @@
 <?php
-require_once '../Core/DatabaseManager.php';
-require_once '../Core/ProcessData.php';
-
+require_once __DIR__.'/../vendor/autoload.php';
+use App\Core\DatabaseManager;
+use App\Core\TableBuilder;
 session_start();
 
 if (!isset($_SESSION['usuario'])) {

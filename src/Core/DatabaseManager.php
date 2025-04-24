@@ -1,5 +1,10 @@
 <?php
-	
+namespace App\Core;
+use mysqli; // Importando a classe mysqli para conexão com o banco de dados
+use Exception; // Importando a classe Exception para tratamento de erros
+// Criando um singleton para gerenciar a conexão com o banco de dados
+// singleton é um padrão de projeto que garante que uma classe tenha...
+// Apenas uma instância e fornece um ponto de acesso global a ela.
 	class DatabaseManager {
 		// Instância única da classe
 		private static $instance = null;
@@ -45,13 +50,12 @@
 		}
 		
 		// Método para executar consultas SQL (opcional, se necessário)
-		public function query($sql) {
-			$result = $this->connection->query($sql);
-			
-			if ($result === false) {
-				die("Erro na consulta: " . $this->connection->error);
+		public function query($sql, $params = []) {
+			$stmt = $this->connection->prepare($sql);
+			if ($stmt === false) {
+				throw new Exception("Erro ao preparar a consulta: " . $this->connection->error);
 			}
-			
+			$result = $stmt->execute($params);
 			return $result;
 		}
 
@@ -90,6 +94,7 @@
 		}
 		
 		// Método para selecionar dados
+		
 		public function select($table, $conditions = [], $columns = '*') {
 			$sql = "SELECT $columns FROM $table";
 			
@@ -98,7 +103,12 @@
 				$values = [];
 				
 				foreach ($conditions as $key => $value) {
-					$where[] = "$key = ?";
+					if (strpos($key, ' ') !== false) {
+						// Permitir operadores como "LIKE", ">", "<", etc.
+						$where[] = "$key ?";
+					} else {
+						$where[] = "$key = ?";
+					}
 					$values[] = $value;
 				}
 				

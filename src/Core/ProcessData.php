@@ -1,10 +1,14 @@
 <?php
-
+namespace App\Core;
+use Datetime;
+use Exception; // Importando a classe Exception para tratamento de erros
 
 date_default_timezone_set('America/Sao_Paulo');
 class ProcessData{
    
-    private $SEMANA = [
+    
+    private static $SEMANA = [
+        0 => 'Domingo',
         1 => 'Segunda',
         2 => 'Terça',
         3 => 'Quarta',
@@ -13,24 +17,28 @@ class ProcessData{
         6 => 'Sábado'
     ];
 
-    public $DATA_YMD;
-    public $DATA_DMY;
-    public $DIA_SEM;
-    public $HORARIO;
-
-    public function __construct() {
-        $this->DATA_YMD = date('Y-m-d'); // para o banco de dados
-        $this->DATA_DMY = date('d/m/Y', strtotime($this->DATA_YMD)); // para exibir no front-end
-        $this->DIA_SEM = date('w', strtotime($this->DATA_YMD)); // 0 = domingo, 1 = segunda, ..., 6 = sábado
-        $this->HORARIO = date('H:i:s'); // Horário atual no formato HH:MM:SS
-    }
-    function getDiaSemana(int $dia): string{
-        return $this->SEMANA[$dia] ?? 'Dia inválido';
+    public static function getDate($op){
+        if($op == 'y-m-d'){
+            return date('y-m-d');
+        }else if($op == 'd/m/y'){
+            return date('d/m/y', strtotime(date('Y-m-d')));
+        }else{
+            throw new Exception("Formato inválido. Use 'Y-m-d' ou 'd/m/Y'.");
+        }
     }
 
+    public static function getHorario() : string{
+        return date('H:i:s');
+        
+    }
 
-    //validar CPF
-    function validarCPF(string $cpf): bool{
+    public static function getDiaSemana(): string{
+        $DIA_SEM = date('w', strtotime(date('Y-m-d'))); // 0 = domingo, 1 = segunda, ..., 6 = sábado
+        return self::$SEMANA[$DIA_SEM];
+    }
+
+
+    public static function validarCPF(string $cpf): bool{
         $cpf = preg_replace('/[^0-9]/', '', $cpf);
         
         if (strlen($cpf) != 11 || preg_match('/(\d)\1{10}/', $cpf)) {
@@ -51,7 +59,7 @@ class ProcessData{
         return true;
     }
     
-    function validarTelefone(string $telefone): bool{
+    public static function validarTelefone(string $telefone): bool{
         // Remove caracteres não numéricos
         $telefone = preg_replace('/[^0-9]/', '', $telefone);
         
@@ -60,13 +68,13 @@ class ProcessData{
     }
 
     //exemplo cpf de 000.000.000-00 para 00000000000
-    function ApenasNumeros(string $string): string{
+    public static function ApenasNumeros(string $string): string{
         $string_nums = preg_replace('/[^0-9]/', '', $string);
         
         return $string_nums;
     }
 
-    function Idade(string $data_nasc): int{
+    public static function Idade(string $data_nasc): int{
         $data_nasc = DateTime::createFromFormat('Y-m-d', $data_nasc);
         $hoje = new DateTime();
         

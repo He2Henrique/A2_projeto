@@ -4,22 +4,28 @@ require_once '../Core/DatabaseManager.php';
 require_once '../Core/ProcessData.php';
 require_once '../Core/TableBuilder.php';
 session_start();
-
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");//evitar que o usuario acesse a pagina sem estar logado
     exit;
 }
+require_once __DIR__.'/../vendor/autoload.php';
+use App\Core\DatabaseManager;
+use App\Core\TableBuilder;
+use App\Core\ProcessData;
+use App\Core\Modalidades;
 
-$conn = DatabaseManager::getInstance(); // Conexão com o banco de dados  // Definição da data de hoje
-$aulas_hoje = $conn->select('aulas', ['dia_sem' => $SEMANA[$DIA_SEM]], 'id_aulas, id_modalidade, dia_sem, horario');
-$Builder = new TableBuilder;
+
+$builder = new TableBuilder;
+$conn = DatabaseManager::getInstance();
+
+$aulas_hoje = $conn->select('aulas', ['dia_sem' => ProcessData::getDiaSemana()], 'id_aulas, id_modalidade, dia_sem, horario');
 
 $tem = !empty($aulas_hoje);
 if($tem) {
     $matriz = [];
     foreach ($aulas_hoje as $aula) {
-        $button = $Builder->CriarButao('chamada.php?id_aula=' . $aula['id_aulas'], 'Registrar Chamada', 'btn btn-sm btn-success');
-        $linha = [$DATA_DMY, $aula['dia_sem'], $MODALIDADES[$aula['id_modalidade']], $aula['horario'], $button];
+        $button = $builder->CriarButao('chamada.php?id_aula=' . $aula['id_aulas'], 'Registrar Chamada', 'btn btn-sm btn-success');
+        $linha = [ProcessData::getDate('d/m/y'), $aula['dia_sem'], Modalidades::getModalidade_byid($aula['id_modalidade']), $aula['horario'], $button];
         $matriz[] = $linha;
     }
 }
@@ -62,9 +68,9 @@ if($tem) {
             <div class="table-responsive">
                 <?php
                     if ($tem){
-                        $Builder->criar_Header(['Data', 'Dia', 'Modalidade', 'Horário', 'Ações'], "table-dark");
-                        $Builder->definir_corpo($matriz);
-                        $result = $Builder->criar_tabela("table table-hover table-bordered");
+                        $builder->criar_Header(['Data', 'Dia', 'Modalidade', 'Horário', 'Ações'], "table-dark");
+                        $builder->definir_corpo($matriz);
+                        $result = $builder->criar_tabela("table table-hover table-bordered");
                         echo $result;
                     } else {
                         echo "<div class='alert alert-warning'>Nenhuma aula programada para hoje.</div>";
