@@ -50,13 +50,12 @@ use Exception; // Importando a classe Exception para tratamento de erros
 		}
 		
 		// Método para executar consultas SQL (opcional, se necessário)
-		public function query($sql) {
-			$result = $this->connection->query($sql);
-			
-			if ($result === false) {
-				die("Erro na consulta: " . $this->connection->error);
+		public function query($sql, $params = []) {
+			$stmt = $this->connection->prepare($sql);
+			if ($stmt === false) {
+				throw new Exception("Erro ao preparar a consulta: " . $this->connection->error);
 			}
-			
+			$result = $stmt->execute($params);
 			return $result;
 		}
 
@@ -95,6 +94,7 @@ use Exception; // Importando a classe Exception para tratamento de erros
 		}
 		
 		// Método para selecionar dados
+		
 		public function select($table, $conditions = [], $columns = '*') {
 			$sql = "SELECT $columns FROM $table";
 			
@@ -103,7 +103,12 @@ use Exception; // Importando a classe Exception para tratamento de erros
 				$values = [];
 				
 				foreach ($conditions as $key => $value) {
-					$where[] = "$key = ?";
+					if (strpos($key, ' ') !== false) {
+						// Permitir operadores como "LIKE", ">", "<", etc.
+						$where[] = "$key ?";
+					} else {
+						$where[] = "$key = ?";
+					}
 					$values[] = $value;
 				}
 				

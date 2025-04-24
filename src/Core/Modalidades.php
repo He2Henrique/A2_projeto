@@ -26,7 +26,11 @@ class Modalidades{
         return self::$modalidades;
     }
 
-    public function getModalidade_byid($id){
+    public static function getModalidade_byid($id){
+        if (empty(self::$modalidades)) {
+            self::busca_modalidades();
+        }
+
         return self::$modalidades[$id];
     }
 

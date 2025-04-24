@@ -1,15 +1,16 @@
 <?php
 require_once __DIR__.'/../vendor/autoload.php';
 use App\Core\DatabaseManager;
-use App\Core\Process_data;
+use App\Core\ProcessData;
 
 $conn = DatabaseManager::getInstance();
-$prossdata = new Process_data();
+
 $busca = $_GET['busca'] ?? '';
 
-// Consulta com filtro
+
+
 if (!empty($busca)) {
-    $alunos = $conn->query("SELECT * FROM alunos WHERE nome_completo LIKE ?", ["%$busca%"]);
+    $alunos = $conn->select('alunos', ['nome_completo LIKE' => "%$busca%"]);
 } else {
     $alunos = $conn->select('alunos', []);
 }
@@ -63,7 +64,7 @@ if (!empty($busca)) {
                     <tr>
                         <td><?= htmlspecialchars($aluno['nome_completo']) ?></td>
                         <td><?= $aluno['nome_soci'] ?? 'Não possui' ?></td>
-                        <td><?= $process->Idade($aluno['data_nas']) ?></td>
+                        <td><?= ProcessData::Idade($aluno['data_nas']) ?></td>
                         <td><?= $aluno['nome_respon'] ?? 'Não possui' ?></td>
                         <td><?= htmlspecialchars($aluno['numero']) ?></td>
                         <td><?= htmlspecialchars($aluno['email']) ?></td>
