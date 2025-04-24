@@ -1,6 +1,5 @@
 <?php
-require_once('../Core/config_serv.php');
-require_once('../Core/core_func.php');
+require_once '../Dependence/self/depedencias.php';
 
 $conn = DatabaseManager::getInstance();
 
@@ -33,10 +32,11 @@ if (!empty($busca)) {
         <!-- Formulário de busca -->
         <form method="GET" class="mb-4">
             <div class="input-group">
-                <input type="text" name="busca" class="form-control" placeholder="Buscar por nome..." value="<?= htmlspecialchars($busca) ?>">
+                <input type="text" name="busca" class="form-control" placeholder="Buscar por nome..."
+                    value="<?= htmlspecialchars($busca) ?>">
                 <button type="submit" class="btn btn-primary">Buscar</button>
                 <?php if (!empty($busca)): ?>
-                    <a href="listar_alunos.php" class="btn btn-outline-secondary">Limpar</a>
+                <a href="listar_alunos.php" class="btn btn-outline-secondary">Limpar</a>
                 <?php endif; ?>
             </div>
         </form>
@@ -72,8 +72,10 @@ if (!empty($busca)) {
                         </td>
                         <td>
                             <a href="editar_aluno.php?id=<?= $aluno['id'] ?>" class="btn btn-warning btn-sm">Editar</a>
-                            <a href="editar_aluno_aulas.php?id=<?= $aluno['id'] ?>" class="btn btn-info btn-sm">Turmas</a>
-                            <a href="relatorio_aluno.php?id=<?= $aluno['id'] ?>" class="btn btn-primary btn-sm">Relatório</a>
+                            <a href="editar_aluno_aulas.php?id=<?= $aluno['id'] ?>"
+                                class="btn btn-info btn-sm">Turmas</a>
+                            <a href="relatorio_aluno.php?id=<?= $aluno['id'] ?>"
+                                class="btn btn-primary btn-sm">Relatório</a>
                         </td>
                     </tr>
                     <?php endforeach; ?>

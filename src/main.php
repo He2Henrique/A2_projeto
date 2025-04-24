@@ -1,11 +1,12 @@
 <?php
+
+require_once '../Dependence/self/depedencias.php';
 session_start();
 
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");//evitar que o usuario acesse a pagina sem estar logado
     exit;
 }
-require_once '../Dependence/self/depedencias.php'; // Inclui as dependências necessárias
 
 
 $conn = DatabaseManager::getInstance(); // Conexão com o banco de dados  // Definição da data de hoje
