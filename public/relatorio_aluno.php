@@ -1,8 +1,8 @@
 <?php
 session_start();
-require_once('../Core/config_serv.php');
-require_once('../Core/core_func.php');
+require_once __DIR__.'/../vendor/autoload.php';
 
+use App\Core\DatabaseManager;
 // Verifica se o usuário está logado
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");
@@ -32,9 +32,10 @@ $notas = $conn-> select('notas', ['id_aluno' => $id_aluno], 'disciplina, nota');
     <title>Relatório Geral do Aluno</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .table td, .table th {
-            vertical-align: middle;
-        }
+    .table td,
+    .table th {
+        vertical-align: middle;
+    }
     </style>
 </head>
 
@@ -64,10 +65,10 @@ $notas = $conn-> select('notas', ['id_aluno' => $id_aluno], 'disciplina, nota');
                 </thead>
                 <tbody>
                     <?php foreach ($chamadas as $chamada): ?>
-                        <tr>
-                            <td><?= date('d/m/Y', strtotime($chamada['data'])) ?></td>
-                            <td><?= $chamada['presente'] ? 'Presente' : 'Faltou' ?></td>
-                        </tr>
+                    <tr>
+                        <td><?= date('d/m/Y', strtotime($chamada['data'])) ?></td>
+                        <td><?= $chamada['presente'] ? 'Presente' : 'Faltou' ?></td>
+                    </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
@@ -85,10 +86,10 @@ $notas = $conn-> select('notas', ['id_aluno' => $id_aluno], 'disciplina, nota');
                 </thead>
                 <tbody>
                     <?php foreach ($notas as $nota): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($nota['disciplina']) ?></td>
-                            <td><?= htmlspecialchars($nota['nota']) ?></td>
-                        </tr>
+                    <tr>
+                        <td><?= htmlspecialchars($nota['disciplina']) ?></td>
+                        <td><?= htmlspecialchars($nota['nota']) ?></td>
+                    </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>

@@ -1,12 +1,15 @@
 <?php
+require_once __DIR__.'/../vendor/autoload.php';
+use App\Core\DatabaseManager;
+use App\Core\TableBuilder;
+
+$builder = new TableBuilder;
 session_start();
 
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");//evitar que o usuario acesse a pagina sem estar logado
     exit;
 }
-require_once '../Dependence/self/depedencias.php'; // Inclui as dependências necessárias
-
 
 $conn = DatabaseManager::getInstance(); // Conexão com o banco de dados  // Definição da data de hoje
 $aulas_hoje = $conn->select('aulas', ['dia_sem' => $SEMANA[$DIA_SEM]], 'id_aulas, id_modalidade, dia_sem, horario');
@@ -15,7 +18,7 @@ $tem = !empty($aulas_hoje);
 if($tem) {
     $matriz = [];
     foreach ($aulas_hoje as $aula) {
-        $button = CriarButao('chamada.php?id_aula=' . $aula['id_aulas'], 'Registrar Chamada', 'btn btn-sm btn-success');
+        $button = $builder->CriarButao('chamada.php?id_aula=' . $aula['id_aulas'], 'Registrar Chamada', 'btn btn-sm btn-success');
         $linha = [$DATA_DMY, $aula['dia_sem'], $MODALIDADES[$aula['id_modalidade']], $aula['horario'], $button];
         $matriz[] = $linha;
     }

@@ -1,5 +1,5 @@
 <?php
-
+namespace App\Core;
 //criando classe de serviço para criar tabelas HTML
 class TableBuilder {
     private string $header;
@@ -46,8 +46,8 @@ class TableBuilder {
         return '<table class="' . ($css_class == null ? '' : ' ' . $css_class) . '">' . $this->header . $this->corpo . '</table>';
     }
 
-}
+    function CriarButao(string $link, string $texto, ?string $css_class = null) {
+        return '<a href="' . htmlspecialchars($link) . '" class="' . ($css_class == null ? '' : ' ' . $css_class) . '">' . htmlspecialchars($texto) . '</a>';
+    }
 
-function CriarButao(string $link, string $texto, ?string $css_class = null) {
-    return '<a href="' . htmlspecialchars($link) . '" class="' . ($css_class == null ? '' : ' ' . $css_class) . '">' . htmlspecialchars($texto) . '</a>';
 }

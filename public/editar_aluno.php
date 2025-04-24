@@ -1,5 +1,6 @@
 <?php
-require_once '../Dependence/self/depedencias.php';// Include the core functions file
+require_once __DIR__.'/../vendor/autoload.php';
+use App\Core\DatabaseManager;
 session_start();
 
 if (!isset($_SESSION['usuario'])) {

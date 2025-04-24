@@ -1,7 +1,8 @@
 <?php
 session_start();
-require_once('../Core/config_serv.php');
-require_once('../Core/core_func.php');
+require_once __DIR__.'/../vendor/autoload.php';
+use App\Core\DatabaseManager;
+
 
 // Verifica se o usuário está logado
 if (!isset($_SESSION['usuario'])) {
@@ -66,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <a href="listar_alunos.php" class="btn btn-outline-primary mb-3">← Voltar para Lista de Alunos</a>
 
         <?php if (isset($mensagem)): ?>
-            <div class="alert alert-success"><?= $mensagem ?></div>
+        <div class="alert alert-success"><?= $mensagem ?></div>
         <?php endif; ?>
 
         <form method="POST" class="card p-4 shadow-sm">
@@ -77,13 +78,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $checked = in_array($aula['id_aulas'], $aulas_ids) ? 'checked' : '';
                         $modalidade_info = $modalidades[$aula['id_modalidade']] ?? 'Modalidade desconhecida';
                     ?>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" name="aulas[]" 
-                                   value="<?= $aula['id_aulas'] ?>" id="aula_<?= $aula['id_aulas'] ?>" <?= $checked ?>>
-                            <label class="form-check-label" for="aula_<?= $aula['id_aulas'] ?>">
-                                <?= htmlspecialchars($modalidade_info . ' - ' . $aula['dia_sem'] . ' às ' . $aula['horario']) ?>
-                            </label>
-                        </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="aulas[]" value="<?= $aula['id_aulas'] ?>"
+                            id="aula_<?= $aula['id_aulas'] ?>" <?= $checked ?>>
+                        <label class="form-check-label" for="aula_<?= $aula['id_aulas'] ?>">
+                            <?= htmlspecialchars($modalidade_info . ' - ' . $aula['dia_sem'] . ' às ' . $aula['horario']) ?>
+                        </label>
+                    </div>
                     <?php endforeach; ?>
                 </div>
             </div>

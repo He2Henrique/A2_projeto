@@ -1,7 +1,8 @@
 <?php
+require_once __DIR__.'/../vendor/autoload.php';
 session_start();
 
-require_once '../Dependence/self/depedencias.php'; // Include the database connection file
+use App\Core\DatabaseManager;
 
 $conn = DatabaseManager::getInstance();
 

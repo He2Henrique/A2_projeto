@@ -1,5 +1,7 @@
 <?php
-require_once '../Dependence/self/depedencias.php';
+require_once __DIR__.'/../vendor/autoload.php';
+use App\Core\DatabaseManager;
+use App\Core\TableBuilder;
 session_start();
 
 if (!isset($_SESSION['usuario'])) {

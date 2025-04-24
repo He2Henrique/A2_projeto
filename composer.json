@@ -1,0 +1,16 @@
+{
+    "name": "welio/a2_projeto",
+    "authors": [
+        {
+            "name": "He2Henrique",
+            "email": "134214073+He2Henrique@users.noreply.github.com"
+        }
+    ],
+
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "require": {}
+}
