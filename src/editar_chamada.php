@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once '../Dependence/self/depedencias.php';
-
+require_once '../Core/DatabaseManager.php';
+require_once '../Core/ProcessData.php';
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");
     exit;

@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-require_once '../Dependence/self/depedencias.php'; // Include the database connection file
+require_once '../Core/DatabaseManager.php';
 
 $conn = DatabaseManager::getInstance();
 

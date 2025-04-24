@@ -1,7 +1,8 @@
 <?php
-require_once '../Dependence/self/depedencias.php';
-
+require_once '../Core/DatabaseManager.php';
+require_once '../Core/ProcessData.php';
 $conn = DatabaseManager::getInstance();
+$processData = new ProcessData();
 
 $busca = $_GET['busca'] ?? '';
 
@@ -61,7 +62,7 @@ if (!empty($busca)) {
                     <tr>
                         <td><?= htmlspecialchars($aluno['nome_completo']) ?></td>
                         <td><?= $aluno['nome_soci'] ?? 'Não possui' ?></td>
-                        <td><?= Idade($aluno['data_nas']) ?></td>
+                        <td><?= $processData->Idade($aluno['data_nas']) ?></td>
                         <td><?= $aluno['nome_respon'] ?? 'Não possui' ?></td>
                         <td><?= htmlspecialchars($aluno['numero']) ?></td>
                         <td><?= htmlspecialchars($aluno['email']) ?></td>

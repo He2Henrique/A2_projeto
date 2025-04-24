@@ -1,7 +1,5 @@
 <?php
-// Criando um singleton para gerenciar a conexão com o banco de dados
-// singleton é um padrão de projeto que garante que uma classe tenha...
-// Apenas uma instância e fornece um ponto de acesso global a ela.
+	
 	class DatabaseManager {
 		// Instância única da classe
 		private static $instance = null;
@@ -46,12 +44,23 @@
 			return $this->connection;
 		}
 		
+		// Método para executar consultas SQL (opcional, se necessário)
+		public function query($sql) {
+			$result = $this->connection->query($sql);
+			
+			if ($result === false) {
+				die("Erro na consulta: " . $this->connection->error);
+			}
+			
+			return $result;
+		}
 
+		
 		// Para inserir data use
 		//Exemplo de uso:
 		/* $insertData = [
 			'nome' => 'João Silva',
-			'email' => 'joao@example.com',
+			'mail' => 'joao@example.com',
 			'idade' => 30
 		];*/
 		/*$var = [
@@ -166,6 +175,33 @@
 				$sql .= " WHERE " . implode(" AND ", $where);
 			}
 			
+			$stmt = $this->connection->prepare($sql);
+			
+			if ($stmt === false) {
+				die("Erro na preparação: " . $this->connection->error);
+			}
+			
+			// Tipos de parâmetros (s = string, i = integer, d = double, b = blob)
+			$types = str_repeat('s', count($values));
+			$stmt->bind_param($types, ...$values);
+			
+			$result = $stmt->execute();
+			$stmt->close();
+			
+			return $result;
+		}
+
+		// Método para deletar dados
+		public function delete($table, $conditions) {
+			$where = [];
+			$values = [];
+			
+			foreach ($conditions as $key => $value) {
+				$where[] = "$key = ?";
+				$values[] = $value;
+			}
+			
+			$sql = "DELETE FROM $table WHERE " . implode(" AND ", $where);
 			$stmt = $this->connection->prepare($sql);
 			
 			if ($stmt === false) {

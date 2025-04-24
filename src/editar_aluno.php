@@ -1,5 +1,6 @@
 <?php
-require_once '../Dependence/self/depedencias.php';// Include the core functions file
+require_once '../Core/DatabaseManager.php';
+require_once '../Core/ProcessData.php';
 session_start();
 
 if (!isset($_SESSION['usuario'])) {

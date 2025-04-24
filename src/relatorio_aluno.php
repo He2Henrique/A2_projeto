@@ -1,6 +1,7 @@
 <?php
 session_start();
-require_once '../Dependence/self/depedencias.php';
+require_once '../Core/DatabaseManager.php';
+require_once '../Core/ProcessData.php';
 
 // Verifica se o usuário está logado
 if (!isset($_SESSION['usuario'])) {

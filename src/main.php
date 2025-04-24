@@ -1,6 +1,8 @@
 <?php
 
-require_once '../Dependence/self/depedencias.php';
+require_once '../Core/DatabaseManager.php';
+require_once '../Core/ProcessData.php';
+require_once '../Core/TableBuilder.php';
 session_start();
 
 if (!isset($_SESSION['usuario'])) {
@@ -8,15 +10,15 @@ if (!isset($_SESSION['usuario'])) {
     exit;
 }
 
-
 $conn = DatabaseManager::getInstance(); // Conexão com o banco de dados  // Definição da data de hoje
 $aulas_hoje = $conn->select('aulas', ['dia_sem' => $SEMANA[$DIA_SEM]], 'id_aulas, id_modalidade, dia_sem, horario');
+$Builder = new TableBuilder;
 
 $tem = !empty($aulas_hoje);
 if($tem) {
     $matriz = [];
     foreach ($aulas_hoje as $aula) {
-        $button = CriarButao('chamada.php?id_aula=' . $aula['id_aulas'], 'Registrar Chamada', 'btn btn-sm btn-success');
+        $button = $Builder->CriarButao('chamada.php?id_aula=' . $aula['id_aulas'], 'Registrar Chamada', 'btn btn-sm btn-success');
         $linha = [$DATA_DMY, $aula['dia_sem'], $MODALIDADES[$aula['id_modalidade']], $aula['horario'], $button];
         $matriz[] = $linha;
     }
@@ -60,10 +62,9 @@ if($tem) {
             <div class="table-responsive">
                 <?php
                     if ($tem){
-                        $Table = new TableBuilder;
-                        $Table->criar_Header(['Data', 'Dia', 'Modalidade', 'Horário', 'Ações'], "table-dark");
-                        $Table->definir_corpo($matriz);
-                        $result = $Table->criar_tabela("table table-hover table-bordered");
+                        $Builder->criar_Header(['Data', 'Dia', 'Modalidade', 'Horário', 'Ações'], "table-dark");
+                        $Builder->definir_corpo($matriz);
+                        $result = $Builder->criar_tabela("table table-hover table-bordered");
                         echo $result;
                     } else {
                         echo "<div class='alert alert-warning'>Nenhuma aula programada para hoje.</div>";
