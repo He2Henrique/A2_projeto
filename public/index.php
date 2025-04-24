@@ -1,8 +1,5 @@
 <?php
 
-require_once '../Core/DatabaseManager.php';
-require_once '../Core/ProcessData.php';
-require_once '../Core/TableBuilder.php';
 session_start();
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");//evitar que o usuario acesse a pagina sem estar logado

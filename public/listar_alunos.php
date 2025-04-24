@@ -30,7 +30,7 @@ if (!empty($busca)) {
 
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Listar alunos</h2>
-            <a href="main.php" class="btn btn-outline-primary">← Voltar para o Painel</a>
+            <a href="index.php" class="btn btn-outline-primary">← Voltar para o Painel</a>
         </div>
 
         <!-- Formulário de busca -->
@@ -65,11 +65,7 @@ if (!empty($busca)) {
                     <tr>
                         <td><?= htmlspecialchars($aluno['nome_completo']) ?></td>
                         <td><?= $aluno['nome_soci'] ?? 'Não possui' ?></td>
-<<<<<<< HEAD:src/listar_alunos.php
-                        <td><?= $processData->Idade($aluno['data_nas']) ?></td>
-=======
                         <td><?= ProcessData::Idade($aluno['data_nas']) ?></td>
->>>>>>> Acoplando_arquivos:public/listar_alunos.php
                         <td><?= $aluno['nome_respon'] ?? 'Não possui' ?></td>
                         <td><?= htmlspecialchars($aluno['numero']) ?></td>
                         <td><?= htmlspecialchars($aluno['email']) ?></td>
