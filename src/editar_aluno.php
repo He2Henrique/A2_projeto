@@ -88,7 +88,7 @@ if (isset($_GET['id'])) {
 
             <div class="d-grid">
                 <button type="submit" class="btn btn-success">Salvar Alterações</button>
-                <a href="editar_aluno_aulas.php" class="btn btn-outline-primary">← Voltar para o Painel</a>
+                <a href="listar_alunos.php" class="btn btn-outline-primary">← Voltar para o Painel</a>
             </div>
         </form>
     </div>

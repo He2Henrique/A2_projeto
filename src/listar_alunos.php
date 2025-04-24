@@ -1,37 +1,16 @@
 <?php
+require_once('../Core/config_serv.php');
+require_once('../Core/core_func.php');
 
-require_once '../Dependence/self/depedencias.php';
+$conn = DatabaseManager::getInstance();
 
-$conn = DatabaseManager::getInstance(); // Create a new instance of the database connection
+$busca = $_GET['busca'] ?? '';
 
-$alunos = $conn->select('alunos', []); // Select all students from the database
-$turmas = $conn->selectJoin('alunos_aulas','aulas','alunos_aulas.id_aulas = aulas.id_aulas',[] ); 
-
-$matriz = [];
-foreach ($alunos as $aluno){
-    $nome_soci = ($aluno['nome_soci'] == null || '') ? "Não possui" : $aluno['nome_soci'];
-    $nome_respon = ($aluno['nome_respon'] == null || '')? "Não possui" : $aluno['nome_respon'];
-    $matriculadas = "";
-    // Ta muito ruim essa parte podemos melhorar isso depois, mas por enquanto ta funcionando.
-    foreach($turmas as $turma){
-        if($turma['id_alunos'] == $aluno['id']){
-            
-            $matriculadas = $matriculadas . $MODALIDADES[$turma['id_modalidade']] . $turma['dia_sem'] . $turma['horario'] . "<br>";
-                
-        }
-    }
-    $matriculadas == "" ? "Nenhuma turma matriculada" : $matriculadas;
-
-    $status = ($aluno['status_'] == 1 ? 'Ativo' : 'Desativo');
-    $span = '<span class="badge bg-' . ($status == 'Ativo' ? 'success' : 'secondary') . '">' . $status . '</span>';
-    $btn = CriarButao('editar_aluno.php?id=' . $aluno['id'], 'Editar', 'btn btn-warning btn-sm');
-
-
-    $linha = [$aluno['nome_completo'], $nome_soci, Idade($aluno['data_nas']), $nome_respon, $aluno['numero'],
-    $aluno['email'],$matriculadas, $span, $btn];
-    
-
-    $matriz[] = $linha;
+// Consulta com filtro
+if (!empty($busca)) {
+    $alunos = $conn->query("SELECT * FROM alunos WHERE nome_completo LIKE ?", ["%$busca%"]);
+} else {
+    $alunos = $conn->select('alunos', []);
 }
 ?>
 <!DOCTYPE html>
@@ -45,23 +24,64 @@ foreach ($alunos as $aluno){
 
 <body class="bg-light">
     <div class="container mt-5">
+
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Listar alunos</h2>
             <a href="main.php" class="btn btn-outline-primary">← Voltar para o Painel</a>
         </div>
+
+        <!-- Formulário de busca -->
+        <form method="GET" class="mb-4">
+            <div class="input-group">
+                <input type="text" name="busca" class="form-control" placeholder="Buscar por nome..." value="<?= htmlspecialchars($busca) ?>">
+                <button type="submit" class="btn btn-primary">Buscar</button>
+                <?php if (!empty($busca)): ?>
+                    <a href="listar_alunos.php" class="btn btn-outline-secondary">Limpar</a>
+                <?php endif; ?>
+            </div>
+        </form>
+
         <?php if (count($alunos) > 0): ?>
         <div class="table-responsive card p-4 shadow-sm">
-            <?php
-                $table = new TableBuilder;
-                $table->criar_Header(['Nome completo', 'Nome social', 'Idade', 'Nome do responsavel', 'Telefone', 'Email', 'Turmas', 'Status', 'Editar'], "table-dark");
-                $table->definir_corpo($matriz,1);
-                $result = $table->criar_tabela("table table-bordered table-striped table-hover");
-                echo $result;
-
-            ?>
+            <table class="table table-bordered table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Nome completo</th>
+                        <th>Nome social</th>
+                        <th>Idade</th>
+                        <th>Nome do responsável</th>
+                        <th>Telefone</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($alunos as $aluno): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($aluno['nome_completo']) ?></td>
+                        <td><?= $aluno['nome_soci'] ?? 'Não possui' ?></td>
+                        <td><?= Idade($aluno['data_nas']) ?></td>
+                        <td><?= $aluno['nome_respon'] ?? 'Não possui' ?></td>
+                        <td><?= htmlspecialchars($aluno['numero']) ?></td>
+                        <td><?= htmlspecialchars($aluno['email']) ?></td>
+                        <td>
+                            <span class="badge bg-<?= $aluno['status_'] == 1 ? 'success' : 'secondary' ?>">
+                                <?= $aluno['status_'] == 1 ? 'Ativo' : 'Desativo' ?>
+                            </span>
+                        </td>
+                        <td>
+                            <a href="editar_aluno.php?id=<?= $aluno['id'] ?>" class="btn btn-warning btn-sm">Editar</a>
+                            <a href="editar_aluno_aulas.php?id=<?= $aluno['id'] ?>" class="btn btn-info btn-sm">Turmas</a>
+                            <a href="relatorio_aluno.php?id=<?= $aluno['id'] ?>" class="btn btn-primary btn-sm">Relatório</a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
         <?php else: ?>
-        <div class="alert alert-info">Nenhum aluno cadastrado ainda.</div>
+        <div class="alert alert-info">Nenhum aluno encontrado.</div>
         <?php endif; ?>
     </div>
 </body>
