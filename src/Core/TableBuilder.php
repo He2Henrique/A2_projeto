@@ -2,13 +2,9 @@
 namespace App\Core;
 //criando classe de serviço para criar tabelas HTML
 class TableBuilder {
-    private string $header;
-    private string $corpo;
-     
-    function __construct() {
-        $this->header = '';
-        $this->corpo = '';
-    }
+    private string $header = '';
+    private string $corpo = '';
+
     
     public function criar_Header(array $colunas, ?string $css_class = null) {
         $html = '<thead' . ($css_class == null ? '' : ' class="' . $css_class . '"') . '><tr>';

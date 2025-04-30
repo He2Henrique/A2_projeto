@@ -1,8 +1,9 @@
-<?php
+<?php 
 session_start();
 require_once __DIR__.'/../vendor/autoload.php';
 
 use App\Core\DatabaseManager;
+
 // Verifica se o usuário está logado
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");
@@ -11,17 +12,20 @@ if (!isset($_SESSION['usuario'])) {
 
 $conn = DatabaseManager::getInstance();
 
-$id_aluno = $_GET['id'] ?? null;
+$idAluno = $_GET['id'] ?? null;
 
-if (!$id_aluno) {
+if (!$idAluno) {
     die("Aluno não encontrado.");
 }
 
-$aluno = $conn-> select('alunos', ['id' => $id_aluno])[0];
+// Busca os dados do aluno, incluindo campos utilizados no HTML abaixo
+$aluno = $conn->select('alunos', ['id' => $idAluno], 'id, nome_completo, matricula, data_nas as data_nascimento, curso')[0];
 
-$chamadas = $conn-> select('chamadas', ['id_aluno' => $id_aluno], 'id_chamada, data, presente');
+// Busca chamadas do aluno
+$chamadas = $conn->select('chamadas', ['id_aluno' => $idAluno], 'id_chamada, data, presente');
 
-$notas = $conn-> select('notas', ['id_aluno' => $id_aluno], 'disciplina, nota');
+// Busca notas do aluno
+$notas = $conn->select('notas', ['id_aluno' => $idAluno], 'disciplina, nota');
 
 ?>
 <!DOCTYPE html>

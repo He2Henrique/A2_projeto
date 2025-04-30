@@ -3,7 +3,7 @@ namespace App\Core;
 use Datetime;
 use Exception; // Importando a classe Exception para tratamento de erros
 
-date_default_timezone_set('America/Sao_Paulo');
+date_default_timezone_set('America/Sao_Paulo'); // Definindo o fuso horário para São Paulo
 class ProcessData{
    
     

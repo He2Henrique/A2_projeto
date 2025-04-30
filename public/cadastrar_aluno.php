@@ -1,10 +1,11 @@
 <?php
 require_once __DIR__.'/../vendor/autoload.php';
 use App\Core\DatabaseManager; // Importando a classe DatabaseManager
+use App\Core\ProcessData;
 
 //id	nome_completo	nome_soci	data_nas	nome_respon	numero	email	data_matri	
 // numero deve conter apenas 11 char apenas os numeros
-$data_hoje = date('Y-m-d'); // Data atual no formato YYYY-MM-DD
+$data_hoje = processData::getDate('Y-m-d'); // Data atual no formato YYYY-MM-DD
 $conne = DatabaseManager::getInstance(); //instanciando a classe DatabaseManager
 $consulta = $conne->select('modalidades', [], 'id, nome, faixa_etaria'); // Seleciona todas as modalidades
 $modalidades = []; // Array para armazenar as modalidades
@@ -20,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nome_responsavel = $_POST['nome_responsavel'] ?? null;
     $telefone = $_POST['telefone'] ?? null;
     $email = $_POST['email'] ?? null;
-    $data_matricula = $data_hojebd; // Data de matrícula é a data atual
+    $data_matricula = $data_hoje; // Data de matrícula é a data atual
 
     $result = $conne->insert('alunos', [
         'nome_completo' => $nome,

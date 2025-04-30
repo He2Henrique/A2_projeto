@@ -10,10 +10,10 @@ if (!isset($_SESSION['usuario'])) {
 
 $conn = DatabaseManager::getInstance();
 
-$chamadas = $conn->select('chamadas', [], 'id_aula, data, COUNT(*) as total_chamadas');
+$chamadas = $conn->select('chamada', [], 'id_aulas, data, COUNT(*) as total_chamadas');
 
 $aulas = $conn->select('aulas', [], 'id_aulas, id_modalidade, horario');
-$turmas = array_column($conn->select('modalidades', [], 'id_modalidade, nome'), 'nome', 'id_modalidade');
+$turmas = array_column($conn->select('modalidades', [], 'id, nome'), 'nome', 'id');
 
 $mapAula = [];
 foreach ($aulas as $aula) {
@@ -36,7 +36,7 @@ foreach ($aulas as $aula) {
 <body class="bg-light">
     <div class="container mt-5">
         <h2>Chamadas por Turma</h2>
-        <a href="main.php" class="btn btn-outline-primary mb-3">← Voltar para o Painel</a>
+        <a href="index.php" class="btn btn-outline-primary mb-3">← Voltar para o Painel</a>
 
         <div class="card shadow-sm p-4">
             <table class="table table-bordered table-hover">
@@ -51,14 +51,14 @@ foreach ($aulas as $aula) {
                 <tbody>
                     <?php foreach ($chamadas as $chamada): ?>
                     <?php
-                        $aula = $mapAula[$chamada['id_aula']] ?? ['modalidade' => 'Desconhecida', 'horario' => '---'];
+                        $aula = $mapAula[$chamada['id_aulas']] ?? ['modalidade' => 'Desconhecida', 'horario' => '---'];
                     ?>
                     <tr>
                         <td><?= $aula['modalidade'] ?></td>
                         <td><?= $aula['horario'] ?></td>
                         <td><?= date('d/m/Y', strtotime($chamada['data'])) ?></td>
                         <td>
-                            <a href="editar_chamada.php?id_aula=<?= $chamada['id_aula'] ?>&data=<?= $chamada['data'] ?>"
+                        <a href="editar_chamada.php?id_aulas=<?= $chamada['id_aulas'] ?>&data=<?= $chamada['data'] ?>"
                                 class="btn btn-sm btn-warning">Editar Chamada</a>
                         </td>
                     </tr>

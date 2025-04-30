@@ -1,2 +1,26 @@
-teste_1
-demonstração
+# Ignorar tudo fora da pasta do projeto
+../../*
+
+# Ignorar arquivos do sistema e temporários
+*.log
+*.tmp
+*.DAT
+*.blf
+*.regtrans-ms
+*.lnk
+*.ini
+
+# Ignorar pastas comuns que não fazem parte do projeto
+/AppData/
+/Downloads/
+/Contacts/
+/Favorites/
+/Links/
+/Microsoft/
+/Videos/
+/Saved Games/
+/Searches/
+/NTUSER.*
+
+# Ignorar repositórios embutidos
+/A2_projeto/
