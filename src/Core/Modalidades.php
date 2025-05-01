@@ -4,7 +4,7 @@ namespace App\Core; // Define the namespace for the classes
 
 // quando se usa namespace, é necessário importar as classes que serão utilizadas
 use App\Core\DatabaseManager; // Import the DatabaseManager class
-use DateTime;
+
 
 class Modalidades{
 

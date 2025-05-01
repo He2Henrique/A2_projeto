@@ -10,7 +10,7 @@ class DatabaseManager {
 	private $host = 'localhost';
 	private $username = 'root';
 	private $password = '';
-	private $database = 'instituicao_ensino';
+	private $database = 'instituicao';
 
 	private function __construct() {
 		$this->connection = new mysqli(

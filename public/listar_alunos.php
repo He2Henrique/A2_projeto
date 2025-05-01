@@ -64,11 +64,14 @@ if (!empty($busca)) {
                     <?php foreach ($alunos as $aluno): ?>
                     <tr>
                         <td><?= htmlspecialchars($aluno['nome_completo']) ?></td>
-                        <td><?= $aluno['nome_soci'] ?? 'Não possui' ?></td>
+                        <td><?= ($aluno['nome_soci'] != null or $aluno['nome_soci'] != '') ? $aluno['nome_soci'] : 'Não possui' ?>
+                        </td>
                         <td><?= ProcessData::Idade($aluno['data_nas']) ?></td>
-                        <td><?= $aluno['nome_respon'] ?? 'Não possui' ?></td>
+                        <td><?= ($aluno['nome_respon'] != null or $aluno['nome_respon'] != '') ? $aluno['nome_respon'] : 'Não possui'  ?>
+                        </td>
                         <td><?= htmlspecialchars($aluno['numero']) ?></td>
-                        <td><?= htmlspecialchars($aluno['email']) ?></td>
+                        <td><?= ($aluno['email'] != null or $aluno['email'] != '') ? $aluno['email'] : 'Não possui' ?>
+                        </td>
                         <td>
                             <span class="badge bg-<?= $aluno['status_'] == 1 ? 'success' : 'secondary' ?>">
                                 <?= $aluno['status_'] == 1 ? 'Ativo' : 'Desativo' ?>
@@ -76,8 +79,7 @@ if (!empty($busca)) {
                         </td>
                         <td>
                             <a href="editar_aluno.php?id=<?= $aluno['id'] ?>" class="btn btn-warning btn-sm">Editar</a>
-                            <a href="editar_aluno_aulas.php?id=<?= $aluno['id'] ?>"
-                                class="btn btn-info btn-sm">Turmas</a>
+                            <a href="editar_matricula.php?id=<?= $aluno['id'] ?>" class="btn btn-info btn-sm">Turmas</a>
                             <a href="relatorio_aluno.php?id=<?= $aluno['id'] ?>"
                                 class="btn btn-primary btn-sm">Relatório</a>
                         </td>

@@ -2,6 +2,8 @@
 require_once __DIR__.'/../vendor/autoload.php';
 use App\Core\DatabaseManager;
 use App\Core\TableBuilder;
+use App\Core\ProcessData;
+use App\Core\Modalidades;
 session_start();
 
 if (!isset($_SESSION['usuario'])) {
@@ -11,52 +13,55 @@ if (!isset($_SESSION['usuario'])) {
 
 $conn = DatabaseManager::getInstance(); // Conexão com o banco de dados
 
-$id_aula = $_GET['id_aula'] ?? null; // Obter o ID da aula da URL
+$id_turma = $_GET['id_turma'] ?? null; // Obter o ID da turma da URL
 
-if (isset($id_aula)) {
+if (isset($id_turma)) {
 
-    $aula = $conn->select('aulas', ['id_aulas' => $id_aula]);
-    $aula = $aula[0]; // Obter a primeira aula (deve haver apenas uma)
+    $turmas = $conn->select('turmas', ['id' => $id_turma]);
+    $turma = $turmas[0]; // Obter a primeira aula (deve haver apenas uma)
 
-    $id_alunos = $conn->select('alunos_aulas', ['id_aulas' => $aula['id_aulas']], 'id_alunos');
-    foreach($id_alunos as $id){
-        $resultado = $conn->select('alunos', ['id' => $id['id_alunos']], 'nome_completo, id');
+
+
+    $matriculas = $conn->select('matriculas', ['id_turma' => $turma['id']], 'id, id_aluno'); // Obter os alunos matriculados na turma
+    foreach($matriculas as $matricula){
+
+        $resultado = $conn->select('alunos', ['id' => $matricula['id_aluno']], 'nome_completo, id');
         $alunos[] = $resultado[0]; // Adiciona o ID do aluno ao array
+        $matriculas_do_aluno[$matricula['id_aluno']] = $matricula['id']; // Adiciona o ID da matrícula ao array
     }
-    
-    
 } 
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_turma)) {
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_aula)) {
+    $campos = ['data_'=> ProcessData::getDate('y-m-d'),'id_turma'=>$id_turma, 'hora'=> ProcessData::getHorario()];
+    $conn->insert('aulas',$campos);
 
-    $campos = ['data_'=> $data_hojebd,'id_aula'=>$id_aula, 'hora'=> $horario];
-    $conn->insert('ocorrencia',$campos);
-
-    $ultimo_registro = $conn->lastRecord('ocorrencia', 'id'); // Inserir justificativa na tabela ocorrencia
+    $ultimo_registro = $conn->lastRecord('aulas', 'id'); // Inserir justificativa na tabela ocorrencia
     foreach ($alunos as $aluno) {
-        $presenca = $_POST['presenca'][$aluno['id']];
-        if($presenca == 'ausente'){
-            $justificativa = $_POST['justificativa'][$aluno['id']] ?? null;
-            if($justificativa){
-                $presenca = $justificativa;
-            }
+        
+        
+        $presenca = ($_POST['presenca'][$aluno['id']] === 'presente') ? 1 : 0; // Converte para booleano (1 ou 0)
+        $justificativa = $_POST['justificativa'][$aluno['id']] ?? null;
+        
+        if ($justificativa !== null && strlen(trim($justificativa)) <= 4) {
+            $justificativa = null; // Define como null se tiver 4 ou menos caracteres
         }
 
         $campos = [
-            'id_aluno' => $aluno['id'],
-            'id_ocorrencia' => $ultimo_registro['id'],
-            'presença' => $presenca
+            'id_matricula' => $matriculas_do_aluno[$aluno['id']],
+            'id_aula' => $ultimo_registro['id'],
+            'presente' => $presenca,
+            'justificativa' => $justificativa
         ];
 
-        $result = $conn->insert('chamada', $campos);
+        $result = $conn->insert('frequencia', $campos);
         if ($result) {
             $mensagem = "Chamada registrada com sucesso!";
         } else {
             $mensagem = "Erro ao registrar chamada.";
         }
     }
-    echo "<script> alert('$mensagem'); window.location.href = 'main.php'; </script>";
+    echo "<script> alert('$mensagem'); window.location.href = 'index.php'; </script>";
 exit;
 
 }
@@ -75,11 +80,11 @@ exit;
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Registrar Chamada</h2>
-            <a href="main.php" class="btn btn-outline-primary">← Voltar para o Painel</a>
+            <a href="index.php" class="btn btn-outline-primary">← Voltar para o Painel</a>
         </div>
 
         <h4 class="mb-4">
-            <?= isset($aula) ? $data_hojeFront . " - Turma " . $MODALIDADES[$aula['id_modalidade']] . " das ". $aula['horario'] :  'Aula não encontrada' ?>
+            <?= isset($turma) ? ProcessData::getDate('d-m-y') . " - Turma " . Modalidades::getModalidade_byid($turma['id_modalidade']) . " das ". $turma['horario'] :  'Aula não encontrada' ?>
         </h4>
 
         <?php if (isset($mensagem)): ?>
@@ -88,7 +93,7 @@ exit;
 
         <?php if (!empty($alunos)): ?>
         <form method="POST" class="card p-4 shadow-sm">
-            <input type="hidden" name="id_aula" value="<?= $aula['id_aulas'] ?>">
+            <input type="hidden" name="id_turma" value="<?= $turma['id'] ?>">
 
             <table class="table table-bordered">
                 <?php 
@@ -117,7 +122,7 @@ exit;
                 <button type="submit" class="btn btn-success">Salvar Chamada</button>
             </div>
         </form>
-        <?php elseif (isset($aula)): ?>
+        <?php elseif (isset($turma)): ?>
         <div class="alert alert-warning">Nenhum aluno encontrado para essa aula.</div>
         <?php else: ?>
         <div class="alert alert-danger">Aula não encontrada. Verifique os parâmetros da URL.</div>

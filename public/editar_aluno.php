@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__.'/../vendor/autoload.php';
 use App\Core\DatabaseManager;
+
 session_start();
 
 if (!isset($_SESSION['usuario'])) {
@@ -16,30 +17,32 @@ if (isset($_GET['id'])) {
     // Se foi solicitado deletar
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
         // Remove relacionamentos primeiro se houver
-        $conn->delete('alunos_aulas', ['id_alunos' => $id]); 
+        $conn->delete('matriculas', ['id_aluno' => $id]); // Remove aulas que ele está matriculado
         $conn->delete('alunos', ['id' => $id]);
-
+        
         header("Location: listar_alunos.php");
         exit;
     }
 
     $aluno = $conn->select('alunos', ['id' => $id]);
-    if (!$aluno) {
+    if (empty($aluno)) {
         die("Aluno não encontrado.");
     }
 
     $aluno = $aluno[0];
-
+    
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete'])) {
-        $data = [
+        $dadosAtualizados = [
             'nome_completo' => $_POST['nome_completo'],
             'nome_soci' => $_POST['nome_social'],
             'data_nas' => $_POST['data_nascimento'],
             'nome_respon' => $_POST['nome_responsavel'],
             'numero' => $_POST['telefone'],
-            'email' => $_POST['email'],
+            'email' => $_POST['email']
         ];
-        $conn->update('alunos', $data, ['id' => $id]);
+    
+        $conn->update('alunos', $dadosAtualizados, ['id' => $id]);
+    
         header("Location: listar_alunos.php");
         exit;
     }
@@ -67,7 +70,8 @@ if (isset($_GET['id'])) {
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label>Nome completo</label>
-                    <input type="text" name="nome_completo" class="form-control" value="<?= $aluno['nome_completo'] ?>" required>
+                    <input type="text" name="nome_completo" class="form-control" value="<?= $aluno['nome_completo'] ?>"
+                        required>
                 </div>
                 <div class="col-md-6">
                     <label>Nome social</label>
@@ -78,11 +82,13 @@ if (isset($_GET['id'])) {
             <div class="row mb-3">
                 <div class="col-md-4">
                     <label>Data de nascimento</label>
-                    <input type="date" name="data_nascimento" class="form-control" value="<?= $aluno['data_nas'] ?>" required>
+                    <input type="date" name="data_nascimento" class="form-control" value="<?= $aluno['data_nas'] ?>"
+                        required>
                 </div>
                 <div class="col-md-8">
                     <label>Nome do responsável</label>
-                    <input type="text" name="nome_responsavel" class="form-control" value="<?= $aluno['nome_respon'] ?>">
+                    <input type="text" name="nome_responsavel" class="form-control"
+                        value="<?= $aluno['nome_respon'] ?>">
                 </div>
             </div>
 
@@ -105,7 +111,10 @@ if (isset($_GET['id'])) {
         <!-- Botão de deletar -->
         <form method="POST" class="mt-3">
             <input type="hidden" name="delete" value="1">
-            <button type="submit" class="btn btn-danger w-100" onclick="return confirm('Tem certeza que deseja excluir este aluno? Esta ação não pode ser desfeita.')">🗑️ Excluir Aluno</button>
+            <!-- se valor foi definido ou não -->
+            <button type="submit" class="btn btn-danger w-100"
+                onclick="return confirm('Tem certeza que deseja excluir este aluno? Esta ação não pode ser desfeita.')">🗑️
+                Excluir Aluno</button>
         </form>
     </div>
 </body>

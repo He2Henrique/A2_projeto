@@ -8,7 +8,7 @@ $conn = DatabaseManager::getInstance();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
-    $senha = $_POST['senha'];
+    $senha = md5($_POST['senha']);
 
    $resultado = $conn->select('usuarios', ['email' => $email, 'senha' => $senha]);
     // O método select deve retornar um array com os dados do usuário ou false se não existir

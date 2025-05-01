@@ -12,6 +12,13 @@ if (!isset($_SESSION['usuario'])) {
 
 $conn = DatabaseManager::getInstance();
 
+$ocorrencia_chamada = $conn->selectJoin(
+    'chamada',
+    'ocorrencia',
+    ['id_ocorrencia' => 'id'],
+    ['id_aluno','id_ocorrencia', 'presente', 'data_']
+);
+
 $idAluno = $_GET['id'] ?? null;
 
 if (!$idAluno) {
@@ -53,7 +60,7 @@ $notas = $conn->select('notas', ['id_aluno' => $idAluno], 'disciplina, nota');
             <h4>Informações Pessoais</h4>
             <p><strong>Nome:</strong> <?= htmlspecialchars($aluno['nome_completo']) ?></p>
             <p><strong>Matrícula:</strong> <?= htmlspecialchars($aluno['matricula']) ?></p>
-            <p><strong>Data de Nascimento:</strong> <?= date('d/m/Y', strtotime($aluno['data_nascimento'])) ?></p>
+            <p><strong>Data de Nascimento:</strong> <?= date('d/m/Y', strtotime($aluno['data_nas'])) ?></p>
             <p><strong>Curso:</strong> <?= htmlspecialchars($aluno['curso']) ?></p>
         </div>
 

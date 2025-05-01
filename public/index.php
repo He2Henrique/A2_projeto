@@ -15,14 +15,27 @@ use App\Core\Modalidades;
 $builder = new TableBuilder;
 $conn = DatabaseManager::getInstance();
 
-$aulas_hoje = $conn->select('aulas', ['dia_sem' => ProcessData::getDiaSemana()], 'id_aulas, id_modalidade, dia_sem, horario');
+$turmas = $conn->select('turmas', ['dia_sem' => ProcessData::getDiaSemana()], 'id, id_modalidade, dia_sem, horario');
+$aulas = $conn->select('aulas', ['data_' => ProcessData::getDate('y-m-d')], 'id, id_turma');
+$aulas_turmas_ragistradas = array_column($aulas, 'id_turma');
 
-$tem = !empty($aulas_hoje);
-if($tem) {
+
+
+if(!empty($turmas)) {
     $matriz = [];
-    foreach ($aulas_hoje as $aula) {
-        $button = $builder->CriarButao('chamada.php?id_aula=' . $aula['id_aulas'], 'Registrar Chamada', 'btn btn-sm btn-success');
-        $linha = [ProcessData::getDate('d/m/y'), $aula['dia_sem'], Modalidades::getModalidade_byid($aula['id_modalidade']), $aula['horario'], $button];
+    foreach ($turmas as $turma) {
+        if (in_array($turma['id'], $aulas_turmas_ragistradas)) {
+            // Procura o índice do id_turma correspondente no array $aulas
+            $indice = array_search($turma['id'], $aulas_turmas_ragistradas);
+            if ($indice !== false) {
+                $id_aula = $aulas[$indice]['id']; // Obtém o id correspondente
+                $button = $builder->CriarButao('editar_chamada.php?id_turma=' . $id_aula, 'Editar chamada', 'btn btn-info btn-sm');
+            }
+        } else {
+            $button = $builder->CriarButao('chamada.php?id_turma=' . $turma['id'], 'Registrar Chamada', 'btn btn-sm btn-success');
+        }
+        
+        $linha = [ProcessData::getDate('d-m-y'), $turma['dia_sem'], Modalidades::getModalidade_byid($turma['id_modalidade']), $turma['horario'], $button];
         $matriz[] = $linha;
     }
 }
@@ -64,7 +77,7 @@ if($tem) {
             <h5 class="mb-3">Aulas de hoje</h5>
             <div class="table-responsive">
                 <?php
-                    if ($tem){
+                    if (!empty($turmas)){
                         $builder->criar_Header(['Data', 'Dia', 'Modalidade', 'Horário', 'Ações'], "table-dark");
                         $builder->definir_corpo($matriz);
                         $result = $builder->criar_tabela("table table-hover table-bordered");

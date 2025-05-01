@@ -20,10 +20,10 @@ class ProcessData{
     public static function getDate($op){
         if($op == 'y-m-d'){
             return date('y-m-d');
-        }else if($op == 'd/m/y'){
+        }else if($op == 'd-m-y'){
             return date('d/m/y', strtotime(date('Y-m-d')));
         }else{
-            throw new Exception("Formato inválido. Use 'Y-m-d' ou 'd/m/Y'.");
+            throw new Exception("Formato inválido. Use 'y-m-d' ou 'd-m-y'.");
         }
     }
 

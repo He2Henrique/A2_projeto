@@ -5,7 +5,7 @@ use App\Core\ProcessData;
 
 //id	nome_completo	nome_soci	data_nas	nome_respon	numero	email	data_matri	
 // numero deve conter apenas 11 char apenas os numeros
-$data_hoje = processData::getDate('Y-m-d'); // Data atual no formato YYYY-MM-DD
+$data_hoje = processData::getDate('y-m-d'); // Data atual no formato YYYY-MM-DD
 $conne = DatabaseManager::getInstance(); //instanciando a classe DatabaseManager
 $consulta = $conne->select('modalidades', [], 'id, nome, faixa_etaria'); // Seleciona todas as modalidades
 $modalidades = []; // Array para armazenar as modalidades
@@ -30,14 +30,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         'nome_respon' => $nome_responsavel,
         'numero' => $telefone,
         'email' => $email,
-        'data_matri' => $data_matricula
+        'data_cadastro' => $data_matricula
     ]); // Retorna o ID do último registro inserido
 
     $ultimo_registro = $conne->lastRecord('alunos', 'id'); // Obtém o ID do último registro inserido
     foreach ($_POST['opcoes'] as $opcao) {
-        $conne->insert('alunos_aulas', [
-            'id_alunos' => $ultimo_registro['id'], // ID do aluno recém-cadastrado
-            'id_aulas' => $opcao // ID da aula selecionada
+        $conne->insert('matriculas', [
+            'id_aluno' => $ultimo_registro['id'], // ID do aluno recém-cadastrado
+            'id_turma' => $opcao, // ID da aula selecionada
+            'data_matricula' => $data_matricula // Data de matrícula
         ]);
     }
 
@@ -58,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Cadastro de Aluno</h2>
-            <a href="main.php" class="btn btn-outline-primary">← Voltar para o Painel</a>
+            <a href="index.php" class="btn btn-outline-primary">← Voltar para o Painel</a>
         </div>
 
         <?php if (isset($mensagem)): ?>
@@ -90,8 +91,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label>Telefone</label>
-                    <input type="text" name="telefone" class="form-control">
+                    <label>Telefone (seu ou do responsavel)</label>
+                    <input type="text" name="telefone" class="form-control" required>
                     <script>
                     // validador de telefone
                     const telefoneInput = document.querySelector('input[name="telefone"]');
@@ -118,14 +119,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <label>Modalidades</label>
                     <div class="border p-3 rounded">
                         <?php
-                        $aulas = $conne->select('aulas', [], 'id_aulas, id_modalidade, dia_sem, horario'); 
+                        $aulas = $conne->select('turmas', [], 'id, id_modalidade, dia_sem, horario'); 
                         foreach ($aulas as $aula) {
                             $modalidade_info = isset($modalidades[$aula['id_modalidade']]) ? 
                                             $modalidades[$aula['id_modalidade']] : 
                                             'Modalidade Desconhecida';
                             echo '<div class="form-check mb-2">';
-                            echo '<input class="form-check-input" sytle="b"type="checkbox" name="opcoes[]" value="'.$aula['id_aulas'].'" id="aula_'.$aula['id_aulas'].'">';
-                            echo '<label class="form-check-label" for="aula_'.$aula['id_aulas'].'">';
+                            echo '<input class="form-check-input" sytle="b"type="checkbox" name="opcoes[]" value="'.$aula['id'].'" id="aula_'.$aula['id'].'">';
+                            echo '<label class="form-check-label" for="aula_'.$aula['id'].'">';
                             echo htmlspecialchars($modalidade_info . ' - ' . $aula['dia_sem'] . ' às ' . $aula['horario']);
                             echo '</label>';
                             echo '</div>';
