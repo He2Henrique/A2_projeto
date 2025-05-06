@@ -16,35 +16,29 @@ $conn = DatabaseManager::getInstance(); // Conexão com o banco de dados
 $id_turma = $_GET['id_turma'] ?? null; // Obter o ID da turma da URL
 
 if (isset($id_turma)) {
-
     $turmas = $conn->select('turmas', ['id' => $id_turma]);
-    $turma = $turmas[0]; // Obter a primeira aula (deve haver apenas uma)
+    $turma = $turmas[0];
 
-
-
-    $matriculas = $conn->select('matriculas', ['id_turma' => $turma['id']], 'id, id_aluno'); // Obter os alunos matriculados na turma
+    $matriculas = $conn->select('matriculas', ['id_turma' => $turma['id']], 'id, id_aluno');
     foreach($matriculas as $matricula){
-
         $resultado = $conn->select('alunos', ['id' => $matricula['id_aluno']], 'nome_completo, id');
-        $alunos[] = $resultado[0]; // Adiciona o ID do aluno ao array
-        $matriculas_do_aluno[$matricula['id_aluno']] = $matricula['id']; // Adiciona o ID da matrícula ao array
+        $alunos[] = $resultado[0];
+        $matriculas_do_aluno[$matricula['id_aluno']] = $matricula['id'];
     }
 } 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_turma)) {
+    $campos = ['data_' => ProcessData::getDate('y-m-d'), 'id_turma' => $id_turma, 'hora' => ProcessData::getHorario()];
+    $conn->insert('aulas', $campos);
 
-    $campos = ['data_'=> ProcessData::getDate('y-m-d'),'id_turma'=>$id_turma, 'hora'=> ProcessData::getHorario()];
-    $conn->insert('aulas',$campos);
+    $ultimo_registro = $conn->lastRecord('aulas', 'id');
 
-    $ultimo_registro = $conn->lastRecord('aulas', 'id'); // Inserir justificativa na tabela ocorrencia
     foreach ($alunos as $aluno) {
-        
-        
-        $presenca = ($_POST['presenca'][$aluno['id']] === 'presente') ? 1 : 0; // Converte para booleano (1 ou 0)
+        $presenca = ($_POST['presenca'][$aluno['id']] === 'presente') ? 1 : 0;
         $justificativa = $_POST['justificativa'][$aluno['id']] ?? null;
         
         if ($justificativa !== null && strlen(trim($justificativa)) <= 4) {
-            $justificativa = null; // Define como null se tiver 4 ou menos caracteres
+            $justificativa = null;
         }
 
         $campos = [
@@ -55,27 +49,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_turma)) {
         ];
 
         $result = $conn->insert('frequencia', $campos);
-        if ($result) {
-            $mensagem = "Chamada registrada com sucesso!";
-        } else {
-            $mensagem = "Erro ao registrar chamada.";
-        }
+        $mensagem = $result ? "Chamada registrada com sucesso!" : "Erro ao registrar chamada.";
     }
-    echo "<script> alert('$mensagem'); window.location.href = 'index.php'; </script>";
-exit;
 
+    // >>>>>> AQUI ENTRA O LOG <<<<<<
+    $usuario = $_SESSION['usuario'];
+    $dataHora = date('Y-m-d H:i:s');
+    $mensagemLog = "[$dataHora] $usuario registrou chamada para a turma ID $id_turma (aula ID {$ultimo_registro['id']})\n";
+
+    $caminhoLog = __DIR__ . '/logs/log_acoes.txt';
+    file_put_contents($caminhoLog, $mensagemLog, FILE_APPEND);
+
+    echo "<script> alert('$mensagem'); window.location.href = 'index.php'; </script>";
+    exit;
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <title>Registrar Chamada</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-
 <body class="bg-light">
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -84,7 +80,7 @@ exit;
         </div>
 
         <h4 class="mb-4">
-            <?= isset($turma) ? ProcessData::getDate('d-m-y') . " - Turma " . Modalidades::getModalidade_byid($turma['id_modalidade']) . " das ". $turma['horario'] :  'Aula não encontrada' ?>
+            <?= isset($turma) ? ProcessData::getDate('d-m-y') . " - Turma " . Modalidades::getModalidade_byid($turma['id_modalidade']) . " das " . $turma['horario'] :  'Aula não encontrada' ?>
         </h4>
 
         <?php if (isset($mensagem)): ?>
@@ -129,5 +125,4 @@ exit;
         <?php endif; ?>
     </div>
 </body>
-
 </html>
