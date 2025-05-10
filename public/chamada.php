@@ -1,60 +1,55 @@
 <?php
+session_start();
+if (!isset($_SESSION['usuario'])) {
+    header("Location: login.php");//evitar que o usuario acesse a pagina sem estar logado
+    exit;
+}
 require_once __DIR__.'/../vendor/autoload.php';
-use App\Core\DatabaseManager;
 use App\Core\TableBuilder;
 use App\Core\ProcessData;
 use App\Core\Modalidades;
-session_start();
+use App\DAO\AulasDAO;
+use App\DAO\TurmasDAO;
+use App\DAO\MatriculasDAO;
+use App\DAO\AlunoDAO;
 
-if (!isset($_SESSION['usuario'])) {
-    header("Location: login.php");
-    exit;
-}
+$aulasDAO = new AulasDAO();
+$turmasDAO = new TurmasDAO();
+$matriculasDAO = new MatriculasDAO();
+$alunoDAO = new AlunoDAO();
 
-$conn = DatabaseManager::getInstance(); // Conexão com o banco de dados
-
-$id_turma = $_GET['id_turma'] ?? null; // Obter o ID da turma da URL
+$id_turma = $_GET['id_turma'] ?? null;
 
 if (isset($id_turma)) {
-
-    $turmas = $conn->select('turmas', ['id' => $id_turma]);
-    $turma = $turmas[0]; // Obter a primeira aula (deve haver apenas uma)
-
-
-
-    $matriculas = $conn->select('matriculas', ['id_turma' => $turma['id']], 'id, id_aluno'); // Obter os alunos matriculados na turma
-    foreach($matriculas as $matricula){
-
-        $resultado = $conn->select('alunos', ['id' => $matricula['id_aluno']], 'nome_completo, id');
-        $alunos[] = $resultado[0]; // Adiciona o ID do aluno ao array
-        $matriculas_do_aluno[$matricula['id_aluno']] = $matricula['id']; // Adiciona o ID da matrícula ao array
+    $turma = $turmasDAO->selectTurmaModalidade($id_turma);
+    $matriculas = $matriculasDAO->selectMatriculasFromAluno($id_turma);
+    
+    foreach($matriculas as $matricula) {
+        $aluno = $alunoDAO->selectAlunoBYID($matricula['id_aluno']);
+        $alunos[] = $aluno;
+        $matriculas_do_aluno[$matricula['id_aluno']] = $matricula['id'];
     }
-} 
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_turma)) {
-
-    $campos = ['data_'=> ProcessData::getDate('y-m-d'),'id_turma'=>$id_turma, 'hora'=> ProcessData::getHorario()];
-    $conn->insert('aulas',$campos);
-
-    $ultimo_registro = $conn->lastRecord('aulas', 'id'); // Inserir justificativa na tabela ocorrencia
+    $id_aula = $aulasDAO->registrarAula($id_turma);
+    
     foreach ($alunos as $aluno) {
-        
-        
-        $presenca = ($_POST['presenca'][$aluno['id']] === 'presente') ? 1 : 0; // Converte para booleano (1 ou 0)
+        $presenca = ($_POST['presenca'][$aluno['id']] === 'presente') ? 1 : 0;
         $justificativa = $_POST['justificativa'][$aluno['id']] ?? null;
         
         if ($justificativa !== null && strlen(trim($justificativa)) <= 4) {
-            $justificativa = null; // Define como null se tiver 4 ou menos caracteres
+            $justificativa = null;
         }
 
-        $campos = [
+        $frequencia = [
             'id_matricula' => $matriculas_do_aluno[$aluno['id']],
-            'id_aula' => $ultimo_registro['id'],
+            'id_aula' => $id_aula,
             'presente' => $presenca,
             'justificativa' => $justificativa
         ];
 
-        $result = $conn->insert('frequencia', $campos);
+        $result = $aulasDAO->registrarFrequencia($frequencia);
         if ($result) {
             $mensagem = "Chamada registrada com sucesso!";
         } else {
@@ -62,8 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_turma)) {
         }
     }
     echo "<script> alert('$mensagem'); window.location.href = 'index.php'; </script>";
-exit;
-
+    exit;
 }
 ?>
 

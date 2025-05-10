@@ -1,14 +1,13 @@
 <?php
 session_start();
-require_once __DIR__.'/../vendor/autoload.php';
-use App\Core\DatabaseManager;
-
 if (!isset($_SESSION['usuario'])) {
-    header("Location: login.php");
+    header("Location: login.php");//evitar que o usuario acesse a pagina sem estar logado
     exit;
 }
+require_once __DIR__.'/../vendor/autoload.php';
+use App\DAO\AulasDAO;
 
-$conn = DatabaseManager::getInstance();
+$aulasDAO = new AulasDAO();
 
 $id_aula = $_GET['id_aula'] ?? null;
 $data = $_GET['data'] ?? null;
@@ -18,8 +17,8 @@ if (!$id_aula || !$data) {
 }
 
 // Busca chamadas da turma no dia
-$chamadas = $conn->select('chamadas', ['id_aula' => $id_aula, 'data' => $data], 'id_chamada, id_aluno, presente');
-$alunos = $conn->select('alunos', [], 'id, nome_completo');
+$chamadas = $aulasDAO->getChamadasByAula($id_aula, $data);
+$alunos = $aulasDAO->getAlunos();
 
 // Indexa alunos
 $mapAlunos = array_column($alunos, 'nome_completo', 'id');
@@ -27,7 +26,7 @@ $mapAlunos = array_column($alunos, 'nome_completo', 'id');
 // Atualiza chamadas
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($_POST['presencas'] as $id_chamada => $presente) {
-        $conn->update('chamadas', ['presente' => $presente], ['id_chamada' => $id_chamada]);
+        $aulasDAO->atualizarChamada($id_chamada, $presente);
     }
     $mensagem = "Chamadas atualizadas com sucesso!";
 }

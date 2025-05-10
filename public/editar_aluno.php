@@ -1,4 +1,9 @@
 <?php
+session_start();
+if (!isset($_SESSION['usuario'])) {
+    header("Location: login.php");//evitar que o usuario acesse a pagina sem estar logado
+    exit;
+}
 require_once __DIR__.'/../vendor/autoload.php';
 use App\Core\DatabaseManager;
 

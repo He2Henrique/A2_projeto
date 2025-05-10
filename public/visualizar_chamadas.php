@@ -1,27 +1,17 @@
 <?php
 session_start();
 require_once __DIR__.'/../vendor/autoload.php';
-use App\Core\DatabaseManager;
+use App\DAO\AulasDAO;
 
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");
     exit;
 }
 
-$conn = DatabaseManager::getInstance();
+$aulasDAO = new AulasDAO();
 
-$chamadas = $conn->select('chamada', [], 'id_aulas, data, COUNT(*) as total_chamadas');
-
-$aulas = $conn->select('aulas', [], 'id_aulas, id_modalidade, horario');
-$turmas = array_column($conn->select('modalidades', [], 'id, nome'), 'nome', 'id');
-
-$mapAula = [];
-foreach ($aulas as $aula) {
-    $mapAula[$aula['id_aulas']] = [
-        'modalidade' => $turmas[$aula['id_modalidade']] ?? 'Desconhecida',
-        'horario' => $aula['horario']
-    ];
-}
+$chamadas = $aulasDAO->getChamadasPorTurma();
+$mapAula = $aulasDAO->getAulasComModalidades();
 ?>
 
 <!DOCTYPE html>
@@ -58,7 +48,7 @@ foreach ($aulas as $aula) {
                         <td><?= $aula['horario'] ?></td>
                         <td><?= date('d/m/Y', strtotime($chamada['data'])) ?></td>
                         <td>
-                        <a href="editar_chamada.php?id_aulas=<?= $chamada['id_aulas'] ?>&data=<?= $chamada['data'] ?>"
+                            <a href="editar_chamada.php?id_aulas=<?= $chamada['id_aulas'] ?>&data=<?= $chamada['data'] ?>"
                                 class="btn btn-sm btn-warning">Editar Chamada</a>
                         </td>
                     </tr>

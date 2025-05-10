@@ -58,7 +58,32 @@
             }
         }
 
-       
+        public function selectAlunoBYID($id){
+            $sql = "SELECT * FROM alunos WHERE id = :id";
+            
+            $stmt = $this->conn->prepare($sql);
+
+            try{ 
+                $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+                $stmt->execute();
+                return $stmt->fetch(PDO::FETCH_ASSOC);
+            }catch (PDOException $e) {
+                throw new PDOException("Erro ao buscar alunos: " . $e->getMessage(), $e->getCode());
+            }
+        }
+
+        public function updateStatus($id, $status) {
+            $sql = "UPDATE alunos SET status_ = :status WHERE id = :id";
+            $stmt = $this->conn->prepare($sql);
+            
+            try {
+                $stmt->bindValue(':status', $status, PDO::PARAM_STR);
+                $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+                return $stmt->execute();
+            } catch (PDOException $e) {
+                throw new PDOException("Erro ao atualizar status do aluno: " . $e->getMessage(), $e->getCode());
+            }
+        }
     }
 
 

@@ -30,4 +30,32 @@
                 throw new PDOException("Erro ao inserir matrícula: " . $e->getMessage(), $e->getCode());
             }
         }
+
+        public function selectMatriculasFromAluno($id){
+
+             $sql = "SELECT * FROM matriculas WHERE id_aluno = :id";
+            
+            $stmt = $this->conn->prepare($sql);
+
+            try{ 
+                $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+                $stmt->execute();
+                return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }catch (PDOException $e) {
+                throw new PDOException("Erro ao buscar alunos: " . $e->getMessage(), $e->getCode());
+            }
+        }
+
+        public function atulizarStatusMatricula($id,$status){
+            $sql = "UPDATE matricula SET status_ = :valor WHERE id = :id";
+            $stmt = $this->conn->prepare($sql);
+            try{
+                $stmt->bindValue(':valor', $status, PDO::PARAM_INT);
+                $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+                $stmt->execute();
+            }catch (PDOException $e) {
+                throw new PDOException("Erro ao buscar alunos: " . $e->getMessage(), $e->getCode());
+            }
+            
+        }
     }

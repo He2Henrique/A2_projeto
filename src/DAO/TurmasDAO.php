@@ -37,4 +37,16 @@
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
+
+        public function selectTurmaModalidade($id) {
+            $sql = "SELECT * FROM turmas t JOIN modalidades m ON t.id_modalidade = m.id WHERE t.id = :id";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            $turma = $resultado['id_modalidade'] = $resultado['nome'] . ' - ' . $resultado['faixa_etaria']. ' - ' .$resultado['dia_sem']. ' - ' .$resultado['horario'];
+            return $turma;
+        }
+
+
     }
