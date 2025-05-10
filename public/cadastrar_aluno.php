@@ -1,51 +1,34 @@
 <?php
 require_once __DIR__.'/../vendor/autoload.php';
-use App\Core\DatabaseManager; // Importando a classe DatabaseManager
-use App\Core\ProcessData;
+use App\DAO\AlunoDAO;
+use App\DAO\MatriculasDAO;
+use App\DAO\TurmasDAO;
 
-//id	nome_completo	nome_soci	data_nas	nome_respon	numero	email	data_matri	
-// numero deve conter apenas 11 char apenas os numeros
-$data_hoje = processData::getDate('y-m-d'); // Data atual no formato YYYY-MM-DD
-$conne = DatabaseManager::getInstance(); //instanciando a classe DatabaseManager
-$consulta = $conne->select('modalidades', [], 'id, nome, faixa_etaria'); // Seleciona todas as modalidades
+
+
+$conne = new TurmasDAO();
+$consulta = $conne->selectTurmasModalidadesALL(); // Seleciona todas as modalidades
 $modalidades = []; // Array para armazenar as modalidades
 foreach ($consulta as $modalidade) {
-    $modalidades[$modalidade['id']] = $modalidade['nome'] . ' - ' . $modalidade['faixa_etaria'];
+    $modalidades[$modalidade['id_modalidade']] = $modalidade['nome'] . ' - ' . $modalidade['faixa_etaria'];
 }
 
-$result = null; // Inicializa a variável result como nula
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nome = $_POST['nome_completo'] ?? null;
-    $nome_social = $_POST['nome_social'] ?? null;
-    $data_nascimento = $_POST['data_nascimento'] ?? null;
-    $nome_responsavel = $_POST['nome_responsavel'] ?? null;
-    $telefone = $_POST['telefone'] ?? null;
-    $email = $_POST['email'] ?? null;
-    $data_matricula = $data_hoje; // Data de matrícula é a data atual
-
-    $result = $conne->insert('alunos', [
-        'nome_completo' => $nome,
-        'nome_soci' => $nome_social,
-        'data_nas' => $data_nascimento,
-        'nome_respon' => $nome_responsavel,
-        'numero' => $telefone,
-        'email' => $email,
-        'data_cadastro' => $data_matricula
-    ]); // Retorna o ID do último registro inserido
-
-    $ultimo_registro = $conne->lastRecord('alunos', 'id'); // Obtém o ID do último registro inserido
-    foreach ($_POST['opcoes'] as $opcao) {
-        $conne->insert('matriculas', [
-            'id_aluno' => $ultimo_registro['id'], // ID do aluno recém-cadastrado
-            'id_turma' => $opcao, // ID da aula selecionada
-            'data_matricula' => $data_matricula // Data de matrícula
-        ]);
+$metodo = ($_SERVER["REQUEST_METHOD"] == "POST");
+if ($metodo) {
+    $aluno_DAO = new AlunoDAO(); // Cria uma nova instância da classe AlunoDAO
+    $matriculas = new MatriculasDAO(); // Cria uma nova instância da classe MatriculasDAO
+    $ultimo_registro = $aluno_DAO->insert($_POST);//insere o aluno e retorna o ID do aluno recém-cadastrado
+    
+    if(isset($_POST['opcoes'])){
+        foreach ($_POST['opcoes'] as $opcao) {
+            $matriculas->insert([
+                'id_aluno' => $ultimo_registro, // ID do aluno recém-cadastrado
+                'id_turma' => $opcao]);
+        }
     }
-
-    
-    
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -116,22 +99,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label>Modalidades</label>
-                    <div class="border p-3 rounded">
-                        <?php
-                        $aulas = $conne->select('turmas', [], 'id, id_modalidade, dia_sem, horario'); 
-                        foreach ($aulas as $aula) {
-                            $modalidade_info = isset($modalidades[$aula['id_modalidade']]) ? 
-                                            $modalidades[$aula['id_modalidade']] : 
-                                            'Modalidade Desconhecida';
-                            echo '<div class="form-check mb-2">';
-                            echo '<input class="form-check-input" sytle="b"type="checkbox" name="opcoes[]" value="'.$aula['id'].'" id="aula_'.$aula['id'].'">';
-                            echo '<label class="form-check-label" for="aula_'.$aula['id'].'">';
-                            echo htmlspecialchars($modalidade_info . ' - ' . $aula['dia_sem'] . ' às ' . $aula['horario']);
-                            echo '</label>';
-                            echo '</div>';
-                        }
-                        ?>
+                    <label>Turmas</label>
+                    <div class="border p-3 rounded" id="turmas-container">
+                        <!-- As turmas serão carregadas dinamicamente aqui -->
                     </div>
                 </div>
             </div>
@@ -144,12 +114,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="col-md-12">
                     <?php 
                     
-                        if($result) {
+                        if(isset($ultimo_registro)) {
                             echo '<div class="alert alert-success">';
                             echo "Aluno cadastrado com sucesso!";
                             echo '</div>';
 
-                        } else if ($result === false) {
+                        } else if($metodo){
                             echo '<div class="alert alert-danger">';
                             echo "Aluno não cadastrado!";
                             echo '</div>';
@@ -167,6 +137,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </html>
 
 
-<Script>
+<script>
+const dataNascimentoInput = document.querySelector('input[name="data_nascimento"]');
+const turmasContainer = document.querySelector('#turmas-container');
+const modalidades = <?php echo json_encode($consulta, JSON_UNESCAPED_UNICODE); ?>;
 
-</Script>
+console.log(modalidades);
+dataNascimentoInput.addEventListener('change', function() {
+    const dataNascimento = new Date(this.value);
+    const hoje = new Date();
+    let idade = hoje.getFullYear() - dataNascimento.getFullYear();
+    const mes = hoje.getMonth() - dataNascimento.getMonth();
+
+    if (mes < 0 || (mes === 0 && hoje.getDate() < dataNascimento.getDate())) {
+        idade--;
+    }
+
+    console.log('Idade calculada:', idade); // Verifica a idade no console
+
+    // Filtra as modalidades com base na idade
+    const turmasValidas = modalidades.filter(modalidade => {
+        return idade >= modalidade.idade_min && idade <= modalidade.idade_max;
+    });
+
+    console.log(turmasValidas);
+
+    // Atualiza o HTML com as turmas válidas
+    turmasContainer.innerHTML = ''; // Limpa as turmas existentes
+    if (turmasValidas.length === 0) {
+        turmasContainer.innerHTML =
+            '<div class="alert alert-warning">Nenhuma turma disponível para a idade informada.</div>';
+    } else {
+        turmasValidas.forEach(turma => {
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = 'opcoes[]';
+            checkbox.value = turma.id;
+            checkbox.id = 'turma_' + turma.id;
+            checkbox.classList.add('form-check-input');
+
+            const label = document.createElement('label');
+            label.htmlFor = 'turma_' + turma.id;
+            label.classList.add('form-check-label');
+            label.textContent = `${turma.nome} - ${turma.faixa_etaria} - ${turma.horario}`;
+
+            const div = document.createElement('div');
+            div.classList.add('form-check', 'mb-2');
+            div.appendChild(checkbox);
+            div.appendChild(label);
+
+            turmasContainer.appendChild(div);
+        });
+    }
+});
+</script>

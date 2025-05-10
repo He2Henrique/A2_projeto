@@ -1,36 +1,29 @@
 <?php
 require_once __DIR__.'/../vendor/autoload.php';
-session_start();
-
 use App\DAO\UsuariosDAO;
 
-
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $email = $_POST['email'];
-    $senha = $_POST['senha'];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    
 
     $conne = new UsuariosDAO();
-    $usuario = $conne->selectUsuariosBYemail($email);
-   
+    $result = $conne->cadastrando_usuario($_POST);
 
-    if ($usuario && password_verify($senha, $usuario['senha'])) {
-        $_SESSION['usuario'] = $usuario['nome'];
-        header("Location: index.php"); // Redireciona para a página principal
+    if ($result) {
+        header("Location: login.php");
         exit;
     } else {
-        $erro = "Email ou senha incorretos.";
-    }  
-      
+        $erro = "Erro ao cadastrar. E-mail já pode estar em uso.";
+    }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
-    <link href="../Dependence/Bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <title>Cadastro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -38,13 +31,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <div class="card p-4 shadow-sm">
-                    <h2 class="text-center mb-4">Login</h2>
+                    <h2 class="text-center mb-4">Criar conta</h2>
 
                     <?php if (isset($erro)): ?>
                     <div class="alert alert-danger"><?= $erro ?></div>
                     <?php endif; ?>
 
                     <form method="POST">
+                        <div class="mb-3">
+                            <label>Nome</label>
+                            <input type="text" name="nome" class="form-control" required>
+                        </div>
                         <div class="mb-3">
                             <label>Email</label>
                             <input type="email" name="email" class="form-control" required>
@@ -54,12 +51,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <input type="password" name="senha" class="form-control" required>
                         </div>
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Entrar</button>
+                            <button type="submit" class="btn btn-success">Cadastrar</button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="login.php">Voltar ao login</a>
                         </div>
                     </form>
-                    <div class="text-center mt-3">
-                        <a href="login_cadastro.php">Criar conta</a>
-                    </div>
                 </div>
             </div>
         </div>

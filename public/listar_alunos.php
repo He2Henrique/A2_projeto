@@ -1,19 +1,17 @@
 <?php
 require_once __DIR__.'/../vendor/autoload.php';
-use App\Core\DatabaseManager;
 use App\Core\ProcessData;
+use App\DAO\AlunoDAO;
 
-$conn = DatabaseManager::getInstance();
-$processData = new ProcessData();
+$conn = new AlunoDAO;
+$datafunction = new ProcessData();
 
 $busca = $_GET['busca'] ?? '';
 
-
-
 if (!empty($busca)) {
-    $alunos = $conn->select('alunos', ['nome_completo LIKE' => "%$busca%"]);
+    $alunos = $conn->selectAlunosBYnameLIKE($busca);
 } else {
-    $alunos = $conn->select('alunos', []);
+    $alunos = $conn->selectAlunosALL();
 }
 ?>
 <!DOCTYPE html>
@@ -66,7 +64,7 @@ if (!empty($busca)) {
                         <td><?= htmlspecialchars($aluno['nome_completo']) ?></td>
                         <td><?= ($aluno['nome_soci'] != null or $aluno['nome_soci'] != '') ? $aluno['nome_soci'] : 'Não possui' ?>
                         </td>
-                        <td><?= ProcessData::Idade($aluno['data_nas']) ?></td>
+                        <td><?= $datafunction->Idade($aluno['data_nas']) ?></td>
                         <td><?= ($aluno['nome_respon'] != null or $aluno['nome_respon'] != '') ? $aluno['nome_respon'] : 'Não possui'  ?>
                         </td>
                         <td><?= htmlspecialchars($aluno['numero']) ?></td>

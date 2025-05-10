@@ -7,7 +7,7 @@ date_default_timezone_set('America/Sao_Paulo'); // Definindo o fuso horário par
 class ProcessData{
    
     
-    private static $SEMANA = [
+    private $SEMANA = [
         0 => 'Domingo',
         1 => 'Segunda',
         2 => 'Terça',
@@ -17,7 +17,7 @@ class ProcessData{
         6 => 'Sábado'
     ];
 
-    public static function getDate($op){
+    public function getDate($op){
         if($op == 'y-m-d'){
             return date('y-m-d');
         }else if($op == 'd-m-y'){
@@ -27,18 +27,18 @@ class ProcessData{
         }
     }
 
-    public static function getHorario() : string{
+    public function getHorario() : string{
         return date('H:i:s');
         
     }
 
-    public static function getDiaSemana(): string{
+    public function getDiaSemana(): string{
         $DIA_SEM = date('w', strtotime(date('Y-m-d'))); // 0 = domingo, 1 = segunda, ..., 6 = sábado
-        return self::$SEMANA[$DIA_SEM];
+        return $this->SEMANA[$DIA_SEM];
     }
 
 
-    public static function validarCPF(string $cpf): bool{
+    public function validarCPF(string $cpf): bool{
         $cpf = preg_replace('/[^0-9]/', '', $cpf);
         
         if (strlen($cpf) != 11 || preg_match('/(\d)\1{10}/', $cpf)) {
@@ -59,7 +59,7 @@ class ProcessData{
         return true;
     }
     
-    public static function validarTelefone(string $telefone): bool{
+    public function validarTelefone(string $telefone): bool{
         // Remove caracteres não numéricos
         $telefone = preg_replace('/[^0-9]/', '', $telefone);
         
@@ -68,13 +68,13 @@ class ProcessData{
     }
 
     //exemplo cpf de 000.000.000-00 para 00000000000
-    public static function ApenasNumeros(string $string): string{
+    public function ApenasNumeros(string $string): string{
         $string_nums = preg_replace('/[^0-9]/', '', $string);
         
         return $string_nums;
     }
 
-    public static function Idade(string $data_nasc): int{
+    public function Idade(string $data_nasc): int{
         $data_nasc = DateTime::createFromFormat('Y-m-d', $data_nasc);
         $hoje = new DateTime();
         

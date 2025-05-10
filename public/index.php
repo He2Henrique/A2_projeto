@@ -6,22 +6,28 @@ if (!isset($_SESSION['usuario'])) {
     exit;
 }
 require_once __DIR__.'/../vendor/autoload.php';
-use App\Core\DatabaseManager;
 use App\Core\TableBuilder;
 use App\Core\ProcessData;
-use App\Core\Modalidades;
-
+use App\DAO\ModalidadesDAO;
+use App\DAO\TurmasDAO;
+use App\DAO\AulasDAO;
 
 $builder = new TableBuilder;
-$conn = DatabaseManager::getInstance();
+$data = new ProcessData();
 
-$turmas = $conn->select('turmas', ['dia_sem' => ProcessData::getDiaSemana()], 'id, id_modalidade, dia_sem, horario');
-$aulas = $conn->select('aulas', ['data_' => ProcessData::getDate('y-m-d')], 'id, id_turma');
+
+$conn = new TurmasDAO();
+$turmas = $conn->TurmasHJ();
+$conn = new AulasDAO();
+$aulas = $conn->AulasRealizadasHJ();
+$conn = new ModalidadesDAO();
+
 $aulas_turmas_ragistradas = array_column($aulas, 'id_turma');
 
 
 
 if(!empty($turmas)) {
+    
     $matriz = [];
     foreach ($turmas as $turma) {
         if (in_array($turma['id'], $aulas_turmas_ragistradas)) {
@@ -35,7 +41,7 @@ if(!empty($turmas)) {
             $button = $builder->CriarButao('chamada.php?id_turma=' . $turma['id'], 'Registrar Chamada', 'btn btn-sm btn-success');
         }
         
-        $linha = [ProcessData::getDate('d-m-y'), $turma['dia_sem'], Modalidades::getModalidade_byid($turma['id_modalidade']), $turma['horario'], $button];
+        $linha = [$data->getDate('d-m-y'), $turma['dia_sem'], $conn->selectModalidadesbyID($turma['id_modalidade']), $turma['horario'], $button];
         $matriz[] = $linha;
     }
 }
