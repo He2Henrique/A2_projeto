@@ -142,52 +142,53 @@ try {
             </h4>
 
             <div class="table-responsive">
-                <table class="table table-bordered table-striped table-hover">
+                <table class="table table-bordered table-hover">
                     <thead class="table-dark">
                         <tr>
-                            <th>Nome do Aluno</th>
+                            <th>Aluno</th>
                             <th>Turma</th>
-                            <th>Total de Faltas</th>
+                            <th>Data Matrícula</th>
+                            <th>Faltas</th>
+                            <th>Faltas Justificadas</th>
                             <th>Status</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($relatorio as $linha): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($linha['nome_completo']) ?></td>
-                            <td><?= htmlspecialchars($linha['turma_info']) ?></td>
-                            <td>
-                                <span
-                                    class="badge <?= $linha['total_faltas'] >= 3 ? 'badge-danger' : 'badge-warning' ?>">
-                                    <?= $linha['total_faltas'] ?>
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge bg-<?= $linha['status_matricula'] == 1 ? 'success' : 'secondary' ?>">
-                                    <?= $linha['status_matricula'] == 1 ? 'Ativo' : 'Inativo' ?>
-                                </span>
-                            </td>
-                            <td>
-                                <div class="btn-group" role="group">
-                                    <a href="relatorio_detalhado.php?id_matricula=<?= $linha['id_matricula'] ?>"
-                                        class="btn btn-primary btn-sm" title="Ver relatório detalhado">
-                                        📊
-                                    </a>
-                                    <form method="POST" class="d-inline" onsubmit="return confirmarAlteracaoStatus(this);">
+                            <tr class="<?= $linha['status_matricula'] ? '' : 'table-danger' ?>">
+                                <td><?= htmlspecialchars($linha['nome_completo']) ?></td>
+                                <td><?= htmlspecialchars($linha['turma_info']) ?></td>
+                                <td><?= date('d/m/Y', strtotime($linha['data_matricula'])) ?></td>
+                                <td>
+                                    <span class="badge bg-<?= $linha['total_faltas'] >= 3 ? 'danger' : 'warning' ?>">
+                                        <?= $linha['total_faltas'] ?> falta(s)
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        <?= $linha['total_faltas_justificadas'] ?> falta(s) justificada(s)
+                                    </span>
+                                </td>
+                                <td>
+                                    <form method="POST" class="d-inline">
                                         <input type="hidden" name="action" value="toggle_status">
                                         <input type="hidden" name="id_matricula" value="<?= $linha['id_matricula'] ?>">
                                         <input type="hidden" name="id_turma" value="<?= $linha['id_turma'] ?>">
                                         <input type="hidden" name="data_matricula" value="<?= $linha['data_matricula'] ?>">
-                                        <input type="hidden" name="novo_status" value="<?= $linha['status_matricula'] == 1 ? '0' : '1' ?>">
-                                        <button type="submit" class="btn btn-<?= $linha['status_matricula'] == 1 ? 'warning' : 'success' ?> btn-sm" 
-                                                title="<?= $linha['status_matricula'] == 1 ? 'Desativar' : 'Ativar' ?> matrícula">
-                                            <?= $linha['status_matricula'] == 1 ? '⛔' : '✅' ?>
+                                        <input type="hidden" name="novo_status" value="<?= $linha['status_matricula'] ? '0' : '1' ?>">
+                                        <button type="submit" class="btn btn-sm btn-<?= $linha['status_matricula'] ? 'success' : 'danger' ?>">
+                                            <?= $linha['status_matricula'] ? 'Ativo' : 'Inativo' ?>
                                         </button>
                                     </form>
-                                </div>
-                            </td>
-                        </tr>
+                                </td>
+                                <td>
+                                    <a href="relatorio_detalhado.php?id_matricula=<?= $linha['id_matricula'] ?>" 
+                                       class="btn btn-sm btn-info">
+                                        Ver Detalhes
+                                    </a>
+                                </td>
+                            </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>

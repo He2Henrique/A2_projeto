@@ -39,7 +39,8 @@
                         t.id as id_turma,
                         m.data_matricula,
                         CONCAT(modalidade.nome, ' - ', modalidade.faixa_etaria, ' - ', t.dia_sem, ' - ', t.horario) as turma_info,
-                        COUNT(CASE WHEN f.presente = 0 THEN 1 END) as total_faltas,
+                        COUNT(CASE WHEN f.presente = 0 AND f.justificativa IS NULL THEN 1 END) as total_faltas,
+                        COUNT(CASE WHEN f.presente = 0 AND f.justificativa IS NOT NULL THEN 1 END) as total_faltas_justificadas,
                         m.status_ as status_matricula
                     FROM alunos a
                     JOIN matriculas m ON a.id = m.id_aluno
@@ -48,11 +49,15 @@
                     LEFT JOIN frequencia f ON m.id = f.id_matricula";
 
             if ($idTurma) {
-                $sql .= " AND t.id = :id_turma";
+                $sql .= " WHERE t.id = :id_turma";
             }
 
             $sql .= " GROUP BY a.id, m.id, t.id, modalidade.nome, modalidade.faixa_etaria, t.dia_sem, t.horario, m.status_, m.data_matricula
-                     ORDER BY total_faltas DESC, a.nome_completo";
+                     ORDER BY 
+                        m.status_ DESC,
+                        total_faltas DESC,
+                        total_faltas_justificadas DESC,
+                        a.nome_completo";
 
             $stmt = $this->conn->prepare($sql);
 
