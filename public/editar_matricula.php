@@ -27,11 +27,16 @@ try {
         exit;
     }
 
+    // Calcula a idade do aluno
+    $dataNascimento = new DateTime($aluno['data_nas']);
+    $hoje = new DateTime();
+    $idade = $hoje->diff($dataNascimento)->y;
+
     // Busca matrículas do aluno
     $matriculas = $matriculasDAO->selectMatriculaByAluno($idAluno);
     
-    // Busca todas as turmas para o formulário
-    $turmas = $turmasDAO->selectTurmasModalidadesALL();
+    // Busca turmas compatíveis com a idade do aluno
+    $turmas = $turmasDAO->selectTurmasCompatibleisComIdade($idade);
 
     // Processa o formulário
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -45,15 +50,24 @@ try {
                         'status_' => (int)$_POST['status']
                     ];
 
-                    // Verifica se já existe matrícula ativa para esta turma
-                    if ($matriculasDAO->verificarMatriculaExistente($idAluno, $matricula['id_turma'], $idMatricula)) {
-                        $erro = "Já existe uma matrícula ativa para esta turma.";
+                    // Verifica se a turma selecionada é compatível com a idade
+                    $turmaSelecionada = array_filter($turmas, function($t) use ($matricula) {
+                        return $t['id'] === $matricula['id_turma'];
+                    });
+                    
+                    if (empty($turmaSelecionada)) {
+                        $erro = "A turma selecionada não é compatível com a idade do aluno.";
                     } else {
-                        if ($matriculasDAO->update($idMatricula, $matricula)) {
-                            $mensagem = "Matrícula atualizada com sucesso!";
-                            $matriculas = $matriculasDAO->selectMatriculaByAluno($idAluno);
+                        // Verifica se já existe matrícula ativa para esta turma
+                        if ($matriculasDAO->verificarMatriculaExistente($idAluno, $matricula['id_turma'], $idMatricula)) {
+                            $erro = "Já existe uma matrícula ativa para esta turma.";
                         } else {
-                            $erro = "Erro ao atualizar matrícula.";
+                            if ($matriculasDAO->update($idMatricula, $matricula)) {
+                                $mensagem = "Matrícula atualizada com sucesso!";
+                                $matriculas = $matriculasDAO->selectMatriculaByAluno($idAluno);
+                            } else {
+                                $erro = "Erro ao atualizar matrícula.";
+                            }
                         }
                     }
                     break;
@@ -76,15 +90,24 @@ try {
                         'status_' => 1
                     ];
 
-                    // Verifica se já existe matrícula ativa para esta turma
-                    if ($matriculasDAO->verificarMatriculaExistente($idAluno, $novaMatricula['id_turma'])) {
-                        $erro = "Já existe uma matrícula ativa para esta turma.";
+                    // Verifica se a turma selecionada é compatível com a idade
+                    $turmaSelecionada = array_filter($turmas, function($t) use ($novaMatricula) {
+                        return $t['id'] === $novaMatricula['id_turma'];
+                    });
+                    
+                    if (empty($turmaSelecionada)) {
+                        $erro = "A turma selecionada não é compatível com a idade do aluno.";
                     } else {
-                        if ($matriculasDAO->insert($novaMatricula)) {
-                            $mensagem = "Nova matrícula cadastrada com sucesso!";
-                            $matriculas = $matriculasDAO->selectMatriculaByAluno($idAluno);
+                        // Verifica se já existe matrícula ativa para esta turma
+                        if ($matriculasDAO->verificarMatriculaExistente($idAluno, $novaMatricula['id_turma'])) {
+                            $erro = "Já existe uma matrícula ativa para esta turma.";
                         } else {
-                            $erro = "Erro ao cadastrar nova matrícula.";
+                            if ($matriculasDAO->insert($novaMatricula)) {
+                                $mensagem = "Nova matrícula cadastrada com sucesso!";
+                                $matriculas = $matriculasDAO->selectMatriculaByAluno($idAluno);
+                            } else {
+                                $erro = "Erro ao cadastrar nova matrícula.";
+                            }
                         }
                     }
                     break;
@@ -125,6 +148,11 @@ try {
         <!-- Formulário de Nova Matrícula -->
         <div class="card p-4 shadow-sm mb-4">
             <h4 class="mb-3">Nova Matrícula</h4>
+            <?php if (empty($turmas)): ?>
+            <div class="alert alert-warning">
+                Não há turmas disponíveis compatíveis com a idade do aluno (<?= $idade ?> anos).
+            </div>
+            <?php else: ?>
             <form method="POST" class="row g-3">
                 <input type="hidden" name="action" value="insert">
 
@@ -134,7 +162,7 @@ try {
                         <option value="">Selecione uma turma</option>
                         <?php foreach ($turmas as $turma): ?>
                         <option value="<?= $turma['id'] ?>">
-                            <?= htmlspecialchars($turma['nome'] . ' - ' . $turma['faixa_etaria'] . ' - ' . $turma['dia_sem'] . ' - ' . $turma['horario']) ?>
+                            <?= htmlspecialchars($turma['nome'] . ' - ' . $turma['faixa_etaria'] . ' (' . $turma['idade_min'] . '-' . $turma['idade_max'] . ' anos) - ' . $turma['dia_sem'] . ' - ' . $turma['horario']) ?>
                         </option>
                         <?php endforeach; ?>
                     </select>
@@ -150,6 +178,7 @@ try {
                     <button type="submit" class="btn btn-primary w-100">Matricular</button>
                 </div>
             </form>
+            <?php endif; ?>
         </div>
 
         <!-- Lista de Matrículas -->
@@ -210,7 +239,7 @@ try {
                                                             <?php foreach ($turmas as $turma): ?>
                                                             <option value="<?= $turma['id'] ?>"
                                                                 <?= $turma['id'] == $matricula['id_turma'] ? 'selected' : '' ?>>
-                                                                <?= htmlspecialchars($turma['nome'] . ' - ' . $turma['faixa_etaria'] . ' - ' . $turma['dia_sem'] . ' - ' . $turma['horario']) ?>
+                                                                <?= htmlspecialchars($turma['nome'] . ' - ' . $turma['faixa_etaria'] . ' (' . $turma['idade_min'] . '-' . $turma['idade_max'] . ' anos) - ' . $turma['dia_sem'] . ' - ' . $turma['horario']) ?>
                                                             </option>
                                                             <?php endforeach; ?>
                                                         </select>

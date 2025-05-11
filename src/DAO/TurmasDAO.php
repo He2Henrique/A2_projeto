@@ -50,5 +50,21 @@
             return $stmt->fetch(PDO::FETCH_ASSOC);
         }
 
+        public function selectTurmasCompatibleisComIdade($idade) {
+            $sql = "SELECT t.*, m.nome, m.faixa_etaria, m.idade_min, m.idade_max 
+                    FROM turmas t
+                    JOIN modalidades m ON t.id_modalidade = m.id
+                    WHERE :idade BETWEEN m.idade_min AND m.idade_max
+                    ORDER BY m.nome, m.faixa_etaria, t.dia_sem, t.horario";
+            
+            try {
+                $stmt = $this->conn->prepare($sql);
+                $stmt->bindValue(':idade', $idade, PDO::PARAM_INT);
+                $stmt->execute();
+                return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (PDOException $e) {
+                throw new PDOException("Erro ao buscar turmas compatíveis: " . $e->getMessage(), $e->getCode());
+            }
+        }
 
     }
