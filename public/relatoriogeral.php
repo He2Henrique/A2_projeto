@@ -7,10 +7,43 @@ if (!isset($_SESSION['usuario'])) {
 require_once __DIR__ . '/../vendor/autoload.php';
 use App\DAO\FrequenciaDAO;
 use App\DAO\TurmasDAO;
+use App\DAO\MatriculasDAO;
+use App\DAO\LogDAO;
 
 // Inicializa os DAOs
 $frequenciaDAO = new FrequenciaDAO();
 $turmasDAO = new TurmasDAO();
+$matriculasDAO = new MatriculasDAO();
+$logDAO = new LogDAO();
+
+// Processa o formulário de atualização de matrícula
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'toggle_status') {
+    try {
+        $idMatricula = (int)$_POST['id_matricula'];
+        $novoStatus = (int)$_POST['novo_status'];
+        $matricula = [
+            'id_turma' => (int)$_POST['id_turma'],
+            'data_matricula' => $_POST['data_matricula'],
+            'status_' => $novoStatus
+        ];
+
+        if ($matriculasDAO->update($idMatricula, $matricula)) {
+            // Registra o log da atualização da matrícula
+            $logDAO->registrarLog(
+                $_SESSION['usuario']['id'],
+                'Atualização de status da matrícula',
+                'matriculas',
+                $idMatricula,
+                "Matrícula ID: $idMatricula, Status: " . ($novoStatus == 1 ? 'Ativado' : 'Desativado')
+            );
+            $mensagem = "Status da matrícula atualizado com sucesso!";
+        } else {
+            $erro = "Erro ao atualizar status da matrícula.";
+        }
+    } catch (PDOException $e) {
+        $erro = "Erro ao atualizar status da matrícula: " . $e->getMessage();
+    }
+}
 
 // Busca todas as turmas para o filtro
 $turmas = $turmasDAO->selectTurmasModalidadesALL();
@@ -137,14 +170,21 @@ try {
                             </td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="relatorio_aluno.php?id=<?= $linha['id_aluno'] ?>"
+                                    <a href="relatorio_detalhado.php?id_matricula=<?= $linha['id_matricula'] ?>"
                                         class="btn btn-primary btn-sm" title="Ver relatório detalhado">
                                         📊
                                     </a>
-                                    <a href="editar_matricula.php?id=<?= $linha['id_aluno'] ?>"
-                                        class="btn btn-info btn-sm" title="Gerenciar matrícula">
-                                        🎓
-                                    </a>
+                                    <form method="POST" class="d-inline" onsubmit="return confirmarAlteracaoStatus(this);">
+                                        <input type="hidden" name="action" value="toggle_status">
+                                        <input type="hidden" name="id_matricula" value="<?= $linha['id_matricula'] ?>">
+                                        <input type="hidden" name="id_turma" value="<?= $linha['id_turma'] ?>">
+                                        <input type="hidden" name="data_matricula" value="<?= $linha['data_matricula'] ?>">
+                                        <input type="hidden" name="novo_status" value="<?= $linha['status_matricula'] == 1 ? '0' : '1' ?>">
+                                        <button type="submit" class="btn btn-<?= $linha['status_matricula'] == 1 ? 'warning' : 'success' ?> btn-sm" 
+                                                title="<?= $linha['status_matricula'] == 1 ? 'Desativar' : 'Ativar' ?> matrícula">
+                                            <?= $linha['status_matricula'] == 1 ? '⛔' : '✅' ?>
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
@@ -163,6 +203,14 @@ try {
         </div>
         <?php endif; ?>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    function confirmarAlteracaoStatus(form) {
+        const novoStatus = form.querySelector('input[name="novo_status"]').value;
+        const acao = novoStatus == 1 ? 'ativar' : 'desativar';
+        return confirm(`Tem certeza que deseja ${acao} esta matrícula?`);
+    }
+    </script>
 </body>
 
 </html>
