@@ -1,17 +1,28 @@
 <?php
+session_start();
+if (!isset($_SESSION['usuario'])) {
+    header("Location: login.php");
+    exit;
+}
+
 require_once __DIR__.'/../vendor/autoload.php';
 use App\Core\ProcessData;
 use App\DAO\AlunoDAO;
 
-$conn = new AlunoDAO;
+$alunoDAO = new AlunoDAO();
 $datafunction = new ProcessData();
 
-$busca = $_GET['busca'] ?? '';
+$busca = isset($_GET['busca']) ? trim($_GET['busca']) : '';
 
-if (!empty($busca)) {
-    $alunos = $conn->selectAlunosBYnameLIKE($busca);
-} else {
-    $alunos = $conn->selectAlunosALL();
+try {
+    if (!empty($busca)) {
+        $alunos = $alunoDAO->selectAlunosBYnameLIKE($busca);
+    } else {
+        $alunos = $alunoDAO->selectAlunosALL();
+    }
+} catch (PDOException $e) {
+    $erro = "Erro ao buscar alunos: " . $e->getMessage();
+    $alunos = [];
 }
 ?>
 <!DOCTYPE html>
@@ -25,11 +36,17 @@ if (!empty($busca)) {
 
 <body class="bg-light">
     <div class="container mt-5">
-
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Listar alunos</h2>
-            <a href="index.php" class="btn btn-outline-primary">← Voltar para o Painel</a>
+            <div>
+                <a href="cadastrar_aluno.php" class="btn btn-success me-2">+ Novo Aluno</a>
+                <a href="index.php" class="btn btn-outline-primary">← Voltar para o Painel</a>
+            </div>
         </div>
+
+        <?php if (isset($erro)): ?>
+            <div class="alert alert-danger"><?= htmlspecialchars($erro) ?></div>
+        <?php endif; ?>
 
         <!-- Formulário de busca -->
         <form method="GET" class="mb-4">
@@ -62,24 +79,28 @@ if (!empty($busca)) {
                     <?php foreach ($alunos as $aluno): ?>
                     <tr>
                         <td><?= htmlspecialchars($aluno['nome_completo']) ?></td>
-                        <td><?= ($aluno['nome_soci'] != null or $aluno['nome_soci'] != '') ? $aluno['nome_soci'] : 'Não possui' ?>
-                        </td>
+                        <td><?= !empty($aluno['nome_soci']) ? htmlspecialchars($aluno['nome_soci']) : 'Não possui' ?></td>
                         <td><?= $datafunction->Idade($aluno['data_nas']) ?></td>
-                        <td><?= ($aluno['nome_respon'] != null or $aluno['nome_respon'] != '') ? $aluno['nome_respon'] : 'Não possui'  ?>
-                        </td>
+                        <td><?= !empty($aluno['nome_respon']) ? htmlspecialchars($aluno['nome_respon']) : 'Não possui' ?></td>
                         <td><?= htmlspecialchars($aluno['numero']) ?></td>
-                        <td><?= ($aluno['email'] != null or $aluno['email'] != '') ? $aluno['email'] : 'Não possui' ?>
-                        </td>
+                        <td><?= !empty($aluno['email']) ? htmlspecialchars($aluno['email']) : 'Não possui' ?></td>
                         <td>
                             <span class="badge bg-<?= $aluno['status_'] == 1 ? 'success' : 'secondary' ?>">
-                                <?= $aluno['status_'] == 1 ? 'Ativo' : 'Desativo' ?>
+                                <?= $aluno['status_'] == 1 ? 'Ativo' : 'Inativo' ?>
                             </span>
                         </td>
                         <td>
-                            <a href="editar_aluno.php?id=<?= $aluno['id'] ?>" class="btn btn-warning btn-sm">Editar</a>
-                            <a href="editar_matricula.php?id=<?= $aluno['id'] ?>" class="btn btn-info btn-sm">Turmas</a>
-                            <a href="relatorio_aluno.php?id=<?= $aluno['id'] ?>"
-                                class="btn btn-primary btn-sm">Relatório</a>
+                            <div class="btn-group" role="group">
+                                <a href="editar_aluno.php?id=<?= $aluno['id'] ?>" class="btn btn-warning btn-sm" title="Editar aluno">
+                                    ✏️
+                                </a>
+                                <a href="editar_matricula.php?id=<?= $aluno['id'] ?>" class="btn btn-info btn-sm" title="Gerenciar turmas">
+                                    🎓
+                                </a>
+                                <a href="relatorio_aluno.php?id=<?= $aluno['id'] ?>" class="btn btn-primary btn-sm" title="Ver relatório">
+                                    📊
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     <?php endforeach; ?>

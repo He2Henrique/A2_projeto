@@ -23,7 +23,8 @@
         }
 
         public function selectTurmasModalidadesALL() {
-            $sql = "SELECT t.*, m.* FROM turmas t
+            $sql = "SELECT t.*, m.nome, m.faixa_etaria, m.idade_min, m.idade_max 
+                    FROM turmas t
                     JOIN modalidades m ON t.id_modalidade = m.id";
             $stmt = $this->conn->prepare($sql);
             $stmt->execute();
@@ -44,7 +45,7 @@
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
             $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-            $turma = $resultado['id_modalidade'] = $resultado['nome'] . ' - ' . $resultado['faixa_etaria']. ' - ' .$resultado['dia_sem']. ' - ' .$resultado['horario'];
+            $turma = $resultado['nome'] . ' - ' . $resultado['faixa_etaria']. ' - ' .$resultado['dia_sem']. ' - ' .$resultado['horario'];
             return $turma;
         }
 

@@ -84,6 +84,51 @@
                 throw new PDOException("Erro ao atualizar status do aluno: " . $e->getMessage(), $e->getCode());
             }
         }
+
+        public function update($id, $aluno) {
+            $sql = "UPDATE alunos SET 
+                    nome_completo = :nome_completo,
+                    nome_soci = :nome_soci,
+                    data_nas = :data_nas,
+                    nome_respon = :nome_respon,
+                    numero = :numero,
+                    email = :email
+                    WHERE id = :id";
+            
+            $stmt = $this->conn->prepare($sql);
+            
+            try {
+                $stmt->bindValue(':nome_completo', $aluno['nome_completo'], PDO::PARAM_STR);
+                $stmt->bindValue(':nome_soci', $aluno['nome_social'] ?? null, PDO::PARAM_STR);
+                $stmt->bindValue(':data_nas', $aluno['data_nascimento'], PDO::PARAM_STR);
+                $stmt->bindValue(':nome_respon', $aluno['nome_responsavel'] ?? null, PDO::PARAM_STR);
+                $stmt->bindValue(':numero', $aluno['telefone'], PDO::PARAM_STR);
+                $stmt->bindValue(':email', $aluno['email'] ?? null, PDO::PARAM_STR);
+                $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+                
+                return $stmt->execute();
+            } catch (PDOException $e) {
+                throw new PDOException("Erro ao atualizar aluno: " . $e->getMessage(), $e->getCode());
+            }
+        }
+
+        public function delete($id) {
+            try {
+                // Primeiro, deleta as matrículas do aluno
+                $sql_matriculas = "DELETE FROM matriculas WHERE id_aluno = :id";
+                $stmt_matriculas = $this->conn->prepare($sql_matriculas);
+                $stmt_matriculas->bindValue(':id', $id, PDO::PARAM_INT);
+                $stmt_matriculas->execute();
+
+                // Depois, deleta o aluno
+                $sql_aluno = "DELETE FROM alunos WHERE id = :id";
+                $stmt_aluno = $this->conn->prepare($sql_aluno);
+                $stmt_aluno->bindValue(':id', $id, PDO::PARAM_INT);
+                return $stmt_aluno->execute();
+            } catch (PDOException $e) {
+                throw new PDOException("Erro ao deletar aluno: " . $e->getMessage(), $e->getCode());
+            }
+        }
     }
 
 

@@ -5,9 +5,9 @@ if (!isset($_SESSION['usuario'])) {
     exit;
 }
 require_once __DIR__.'/../vendor/autoload.php';
+
 use App\Core\TableBuilder;
 use App\Core\ProcessData;
-use App\Core\Modalidades;
 use App\DAO\AulasDAO;
 use App\DAO\TurmasDAO;
 use App\DAO\MatriculasDAO;
@@ -17,6 +17,7 @@ $aulasDAO = new AulasDAO();
 $turmasDAO = new TurmasDAO();
 $matriculasDAO = new MatriculasDAO();
 $alunoDAO = new AlunoDAO();
+$data = new ProcessData();
 
 $id_turma = $_GET['id_turma'] ?? null;
 
@@ -78,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_turma)) {
         </div>
 
         <h4 class="mb-4">
-            <?= isset($turma) ? ProcessData::getDate('d-m-y') . " - Turma " . Modalidades::getModalidade_byid($turma['id_modalidade']) . " das ". $turma['horario'] :  'Aula não encontrada' ?>
+            <?= isset($turma) ? $data->getDate('d-m-y') . " - Turma " . $turma :  'Aula não encontrada' ?>
         </h4>
 
         <?php if (isset($mensagem)): ?>

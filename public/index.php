@@ -5,6 +5,7 @@ if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");//evitar que o usuario acesse a pagina sem estar logado
     exit;
 }
+print_r($_SESSION['usuario']);
 require_once __DIR__.'/../vendor/autoload.php';
 use App\Core\TableBuilder;
 use App\Core\ProcessData;

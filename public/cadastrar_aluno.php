@@ -12,10 +12,18 @@ use App\DAO\TurmasDAO;
 
 
 $conne = new TurmasDAO();
-$consulta = $conne->selectTurmasModalidadesALL(); // Seleciona todas as modalidades
-$modalidades = []; // Array para armazenar as modalidades
-foreach ($consulta as $modalidade) {
-    $modalidades[$modalidade['id_modalidade']] = $modalidade['nome'] . ' - ' . $modalidade['faixa_etaria'];
+$consulta = $conne->selectTurmasModalidadesALL(); // Seleciona todas as turmas com suas modalidades
+$turmas = []; // Array para armazenar as turmas
+foreach ($consulta as $turma) {
+    $turmas[] = [
+        'id' => $turma['id'],
+        'nome' => $turma['nome'],
+        'faixa_etaria' => $turma['faixa_etaria'],
+        'horario' => $turma['horario'],
+        'dia_sem' => $turma['dia_sem'],
+        'idade_min' => $turma['idade_min'],
+        'idade_max' => $turma['idade_max']
+    ];
 }
 
 $metodo = ($_SERVER["REQUEST_METHOD"] == "POST");
@@ -145,9 +153,8 @@ if ($metodo) {
 <script>
 const dataNascimentoInput = document.querySelector('input[name="data_nascimento"]');
 const turmasContainer = document.querySelector('#turmas-container');
-const modalidades = <?php echo json_encode($consulta, JSON_UNESCAPED_UNICODE); ?>;
+const turmas = <?php echo json_encode($turmas, JSON_UNESCAPED_UNICODE); ?>;
 
-console.log(modalidades);
 dataNascimentoInput.addEventListener('change', function() {
     const dataNascimento = new Date(this.value);
     const hoje = new Date();
@@ -158,40 +165,47 @@ dataNascimentoInput.addEventListener('change', function() {
         idade--;
     }
 
-    console.log('Idade calculada:', idade); // Verifica a idade no console
-
-    // Filtra as modalidades com base na idade
-    const turmasValidas = modalidades.filter(modalidade => {
-        return idade >= modalidade.idade_min && idade <= modalidade.idade_max;
+    // Filtra as turmas com base na idade
+    const turmasValidas = turmas.filter(turma => {
+        return idade >= turma.idade_min && idade <= turma.idade_max;
     });
 
-    console.log(turmasValidas);
+    // Limpa o container antes de adicionar as novas turmas
+    turmasContainer.innerHTML = '';
 
-    // Atualiza o HTML com as turmas válidas
-    turmasContainer.innerHTML = ''; // Limpa as turmas existentes
     if (turmasValidas.length === 0) {
-        turmasContainer.innerHTML =
-            '<div class="alert alert-warning">Nenhuma turma disponível para a idade informada.</div>';
+        turmasContainer.innerHTML = '<div class="alert alert-warning">Nenhuma turma disponível para a idade informada.</div>';
     } else {
+        // Usa um Set para garantir que não haja duplicatas
+        const turmasUnicas = new Set();
+        
         turmasValidas.forEach(turma => {
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.name = 'opcoes[]';
-            checkbox.value = turma.id;
-            checkbox.id = 'turma_' + turma.id;
-            checkbox.classList.add('form-check-input');
+            // Cria uma chave única para cada turma incluindo o dia da semana
+            const turmaKey = `${turma.id}-${turma.nome}-${turma.faixa_etaria}-${turma.horario}-${turma.dia_sem}`;
+            
+            // Só adiciona se ainda não existir
+            if (!turmasUnicas.has(turmaKey)) {
+                turmasUnicas.add(turmaKey);
+                
+                const div = document.createElement('div');
+                div.classList.add('form-check', 'mb-2');
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'opcoes[]';
+                checkbox.value = turma.id;
+                checkbox.id = 'turma_' + turma.id;
+                checkbox.classList.add('form-check-input');
 
-            const label = document.createElement('label');
-            label.htmlFor = 'turma_' + turma.id;
-            label.classList.add('form-check-label');
-            label.textContent = `${turma.nome} - ${turma.faixa_etaria} - ${turma.horario}`;
+                const label = document.createElement('label');
+                label.htmlFor = 'turma_' + turma.id;
+                label.classList.add('form-check-label');
+                label.textContent = `${turma.nome} - ${turma.faixa_etaria} - ${turma.dia_sem} - ${turma.horario}`;
 
-            const div = document.createElement('div');
-            div.classList.add('form-check', 'mb-2');
-            div.appendChild(checkbox);
-            div.appendChild(label);
-
-            turmasContainer.appendChild(div);
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                turmasContainer.appendChild(div);
+            }
         });
     }
 });

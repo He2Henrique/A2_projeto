@@ -5,51 +5,45 @@ if (!isset($_SESSION['usuario'])) {
     exit;
 }
 require_once __DIR__.'/../vendor/autoload.php';
-use App\Core\DatabaseManager;
-
-session_start();
-
-if (!isset($_SESSION['usuario'])) {
-    header("Location: login.php");
-    exit;
-}
-
-$conn = DatabaseManager::getInstance();
+use App\DAO\AlunoDAO;
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
+    $alunoDAO = new AlunoDAO();
 
     // Se foi solicitado deletar
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
-        // Remove relacionamentos primeiro se houver
-        $conn->delete('matriculas', ['id_aluno' => $id]); // Remove aulas que ele está matriculado
-        $conn->delete('alunos', ['id' => $id]);
+        try {
+            $alunoDAO->delete($id);
+            header("Location: listar_alunos.php");
+            exit;
+        } catch (PDOException $e) {
+            $erro = "Erro ao deletar aluno: " . $e->getMessage();
+        }
+    }
+
+    try {
+        $aluno = $alunoDAO->selectAlunoBYID($id);
+        if (empty($aluno)) {
+            die("Aluno não encontrado.");
+        }
         
-        header("Location: listar_alunos.php");
-        exit;
-    }
-
-    $aluno = $conn->select('alunos', ['id' => $id]);
-    if (empty($aluno)) {
-        die("Aluno não encontrado.");
-    }
-
-    $aluno = $aluno[0];
-    
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete'])) {
-        $dadosAtualizados = [
-            'nome_completo' => $_POST['nome_completo'],
-            'nome_soci' => $_POST['nome_social'],
-            'data_nas' => $_POST['data_nascimento'],
-            'nome_respon' => $_POST['nome_responsavel'],
-            'numero' => $_POST['telefone'],
-            'email' => $_POST['email']
-        ];
-    
-        $conn->update('alunos', $dadosAtualizados, ['id' => $id]);
-    
-        header("Location: listar_alunos.php");
-        exit;
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete'])) {
+            $dadosAtualizados = [
+                'nome_completo' => $_POST['nome_completo'],
+                'nome_social' => $_POST['nome_social'],
+                'data_nascimento' => $_POST['data_nascimento'],
+                'nome_responsavel' => $_POST['nome_responsavel'],
+                'telefone' => $_POST['telefone'],
+                'email' => $_POST['email']
+            ];
+        
+            $alunoDAO->update($id, $dadosAtualizados);
+            header("Location: listar_alunos.php");
+            exit;
+        }
+    } catch (PDOException $e) {
+        $erro = "Erro ao processar aluno: " . $e->getMessage();
     }
 } else {
     die("Aluno não encontrado.");
@@ -69,18 +63,23 @@ if (isset($_GET['id'])) {
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Editar alunos</h2>
-            <a href="listar_alunos.php" class="btn btn-outline-primary">← Voltar para o lista</a>
+            <a href="listar_alunos.php" class="btn btn-outline-primary">← Voltar para a lista</a>
         </div>
+
+        <?php if (isset($erro)): ?>
+            <div class="alert alert-danger"><?= $erro ?></div>
+        <?php endif; ?>
+
         <form method="POST" class="card p-4 shadow-sm">
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label>Nome completo</label>
-                    <input type="text" name="nome_completo" class="form-control" value="<?= $aluno['nome_completo'] ?>"
+                    <input type="text" name="nome_completo" class="form-control" value="<?= htmlspecialchars($aluno['nome_completo']) ?>"
                         required>
                 </div>
                 <div class="col-md-6">
                     <label>Nome social</label>
-                    <input type="text" name="nome_social" class="form-control" value="<?= $aluno['nome_soci'] ?>">
+                    <input type="text" name="nome_social" class="form-control" value="<?= htmlspecialchars($aluno['nome_soci'] ?? '') ?>">
                 </div>
             </div>
 
@@ -93,18 +92,31 @@ if (isset($_GET['id'])) {
                 <div class="col-md-8">
                     <label>Nome do responsável</label>
                     <input type="text" name="nome_responsavel" class="form-control"
-                        value="<?= $aluno['nome_respon'] ?>">
+                        value="<?= htmlspecialchars($aluno['nome_respon'] ?? '') ?>">
                 </div>
             </div>
 
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label>Telefone</label>
-                    <input type="text" name="telefone" class="form-control" value="<?= $aluno['numero'] ?>">
+                    <input type="text" name="telefone" class="form-control" value="<?= htmlspecialchars($aluno['numero']) ?>"
+                        required>
+                    <script>
+                    // validador de telefone
+                    const telefoneInput = document.querySelector('input[name="telefone"]');
+                    telefoneInput.addEventListener('input', function() {
+                        this.value = this.value.replace(/[^0-9]/g, '');
+                    });
+                    telefoneInput.addEventListener('blur', function() {
+                        if (this.value.length > 11) {
+                            this.value = this.value.slice(0, 11);
+                        }
+                    });
+                    </script>
                 </div>
                 <div class="col-md-6">
                     <label>Email</label>
-                    <input type="email" name="email" class="form-control" value="<?= $aluno['email'] ?>">
+                    <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($aluno['email'] ?? '') ?>">
                 </div>
             </div>
 
@@ -116,7 +128,6 @@ if (isset($_GET['id'])) {
         <!-- Botão de deletar -->
         <form method="POST" class="mt-3">
             <input type="hidden" name="delete" value="1">
-            <!-- se valor foi definido ou não -->
             <button type="submit" class="btn btn-danger w-100"
                 onclick="return confirm('Tem certeza que deseja excluir este aluno? Esta ação não pode ser desfeita.')">🗑️
                 Excluir Aluno</button>
