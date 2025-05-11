@@ -71,7 +71,6 @@ try {
                         <th>Nome do responsável</th>
                         <th>Telefone</th>
                         <th>Email</th>
-                        <th>Status</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -84,11 +83,6 @@ try {
                         <td><?= !empty($aluno['nome_respon']) ? htmlspecialchars($aluno['nome_respon']) : 'Não possui' ?></td>
                         <td><?= htmlspecialchars($aluno['numero']) ?></td>
                         <td><?= !empty($aluno['email']) ? htmlspecialchars($aluno['email']) : 'Não possui' ?></td>
-                        <td>
-                            <span class="badge bg-<?= $aluno['status_'] == 1 ? 'success' : 'secondary' ?>">
-                                <?= $aluno['status_'] == 1 ? 'Ativo' : 'Inativo' ?>
-                            </span>
-                        </td>
                         <td>
                             <div class="btn-group" role="group">
                                 <a href="editar_aluno.php?id=<?= $aluno['id'] ?>" class="btn btn-warning btn-sm" title="Editar aluno">

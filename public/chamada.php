@@ -12,11 +12,13 @@ use App\DAO\AulasDAO;
 use App\DAO\TurmasDAO;
 use App\DAO\MatriculasDAO;
 use App\DAO\AlunoDAO;
+use App\DAO\LogDAO;
 
 $aulasDAO = new AulasDAO();
 $turmasDAO = new TurmasDAO();
 $matriculasDAO = new MatriculasDAO();
 $alunoDAO = new AlunoDAO();
+$logDAO = new LogDAO();
 $data = new ProcessData();
 
 $id_turma = $_GET['id_turma'] ?? null;
@@ -47,32 +49,50 @@ if (isset($id_turma)) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_turma)) {
-    $id_aula = $aulasDAO->registrarAula($id_turma);
-    
-    foreach ($alunos as $aluno) {
-        $presenca = ($_POST['presenca'][$aluno['id']] === 'presente') ? 1 : 0;
-        $justificativa = $_POST['justificativa'][$aluno['id']] ?? null;
+    try {
+        $id_aula = $aulasDAO->registrarAula($id_turma, $_SESSION['usuario']['id']);
         
-        if ($justificativa !== null && strlen(trim($justificativa)) <= 4) {
-            $justificativa = null;
+        // Registra o log da criação da aula
+        $logDAO->registrarLog(
+            $_SESSION['usuario']['id'],
+            'Registro de aula',
+            'aulas',
+            $id_aula,
+            "Turma ID: $id_turma"
+        );
+        
+        foreach ($alunos as $aluno) {
+            $presenca = ($_POST['presenca'][$aluno['id']] === 'presente') ? 1 : 0;
+            $justificativa = $_POST['justificativa'][$aluno['id']] ?? null;
+            
+            if ($justificativa !== null && strlen(trim($justificativa)) <= 4) {
+                $justificativa = null;
+            }
+            
+            $id_frequencia = $aulasDAO->registrarFrequencia(
+                $matriculas_do_aluno[$aluno['id']],
+                $id_aula,
+                $presenca,
+                $justificativa
+            );
+            
+            // Registra o log da frequência
+            if ($id_frequencia) {
+                $logDAO->registrarLog(
+                    $_SESSION['usuario']['id'],
+                    'Registro de frequência',
+                    'frequencia',
+                    $id_frequencia,
+                    "Aluno ID: {$aluno['id']}, Aula ID: $id_aula, Presente: " . ($presenca ? 'Sim' : 'Não')
+                );
+            }
         }
-
-        $frequencia = [
-            'id_matricula' => $matriculas_do_aluno[$aluno['id']],
-            'id_aula' => $id_aula,
-            'presente' => $presenca,
-            'justificativa' => $justificativa
-        ];
-
-        $result = $aulasDAO->registrarFrequencia($frequencia);
-        if ($result) {
-            $mensagem = "Chamada registrada com sucesso!";
-        } else {
-            $mensagem = "Erro ao registrar chamada.";
-        }
+        
+        header("Location: visualizar_chamadas.php");
+        exit;
+    } catch (PDOException $e) {
+        $erro = "Erro ao registrar chamada: " . $e->getMessage();
     }
-    echo "<script> alert('$mensagem'); window.location.href = 'index.php'; </script>";
-    exit;
 }
 ?>
 

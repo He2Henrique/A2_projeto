@@ -6,8 +6,10 @@ if (!isset($_SESSION['usuario'])) {
 }
 require_once __DIR__.'/../vendor/autoload.php';
 use App\DAO\AulasDAO;
+use App\DAO\LogDAO;
 
 $aulasDAO = new AulasDAO();
+$logDAO = new LogDAO();
 
 $id_aula = $_GET['id_aula'] ?? null;
 $data = $_GET['data'] ?? null;
@@ -25,10 +27,25 @@ $mapAlunos = array_column($alunos, 'nome_completo', 'id');
 
 // Atualiza chamadas
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    foreach ($_POST['presencas'] as $id_chamada => $presente) {
-        $aulasDAO->atualizarChamada($id_chamada, $presente);
+    try {
+        foreach ($_POST['presencas'] as $id_chamada => $presente) {
+            $resultado = $aulasDAO->atualizarChamada($id_chamada, $presente);
+            
+            if ($resultado) {
+                // Registra o log da atualização da frequência
+                $logDAO->registrarLog(
+                    $_SESSION['usuario']['id'],
+                    'Atualização de frequência',
+                    'frequencia',
+                    $id_chamada,
+                    "Chamada ID: $id_chamada, Presente: " . ($presente ? 'Sim' : 'Não')
+                );
+            }
+        }
+        $mensagem = "Chamadas atualizadas com sucesso!";
+    } catch (PDOException $e) {
+        $erro = "Erro ao atualizar chamadas: " . $e->getMessage();
     }
-    $mensagem = "Chamadas atualizadas com sucesso!";
 }
 ?>
 

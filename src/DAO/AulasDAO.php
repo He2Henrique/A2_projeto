@@ -23,14 +23,16 @@
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
-        public function registrarAula($id_turma) {
-            $sql = "INSERT INTO aulas (data_, id_turma, hora) VALUES (:data_, :id_turma, :hora)";
-            $stmt = $this->conn->prepare($sql);
+        public function registrarAula($id_turma, $id_usuario) {
+            $sql = "INSERT INTO aulas (data_, id_turma, hora, id_usuario) 
+                    VALUES (:data_, :id_turma, :hora, :id_usuario)";
             
             try {
+                $stmt = $this->conn->prepare($sql);
                 $stmt->bindValue(':data_', $this->data->getDate('y-m-d'), PDO::PARAM_STR);
                 $stmt->bindValue(':id_turma', $id_turma, PDO::PARAM_INT);
                 $stmt->bindValue(':hora', $this->data->getHorario(), PDO::PARAM_STR);
+                $stmt->bindValue(':id_usuario', $id_usuario, PDO::PARAM_INT);
                 
                 $stmt->execute();
                 return $this->conn->lastInsertId();
@@ -39,18 +41,19 @@
             }
         }
 
-        public function registrarFrequencia($frequencia) {
+        public function registrarFrequencia($id_matricula, $id_aula, $presente, $justificativa = null) {
             $sql = "INSERT INTO frequencia (id_matricula, id_aula, presente, justificativa) 
                     VALUES (:id_matricula, :id_aula, :presente, :justificativa)";
-            $stmt = $this->conn->prepare($sql);
             
             try {
-                $stmt->bindValue(':id_matricula', $frequencia['id_matricula'], PDO::PARAM_INT);
-                $stmt->bindValue(':id_aula', $frequencia['id_aula'], PDO::PARAM_INT);
-                $stmt->bindValue(':presente', $frequencia['presente'], PDO::PARAM_INT);
-                $stmt->bindValue(':justificativa', $frequencia['justificativa'], PDO::PARAM_STR);
+                $stmt = $this->conn->prepare($sql);
+                $stmt->bindValue(':id_matricula', $id_matricula, PDO::PARAM_INT);
+                $stmt->bindValue(':id_aula', $id_aula, PDO::PARAM_INT);
+                $stmt->bindValue(':presente', $presente, PDO::PARAM_INT);
+                $stmt->bindValue(':justificativa', $justificativa, PDO::PARAM_STR);
                 
-                return $stmt->execute();
+                $stmt->execute();
+                return $this->conn->lastInsertId();
             } catch (PDOException $e) {
                 throw new PDOException("Erro ao registrar frequência: " . $e->getMessage(), $e->getCode());
             }

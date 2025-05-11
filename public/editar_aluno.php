@@ -6,15 +6,30 @@ if (!isset($_SESSION['usuario'])) {
 }
 require_once __DIR__.'/../vendor/autoload.php';
 use App\DAO\AlunoDAO;
+use App\DAO\LogDAO;
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
     $alunoDAO = new AlunoDAO();
+    $logDAO = new LogDAO();
 
     // Se foi solicitado deletar
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
         try {
+            // Busca dados do aluno antes de deletar para o log
+            $aluno = $alunoDAO->selectAlunoBYID($id);
+            
             $alunoDAO->delete($id);
+            
+            // Registra o log da exclusão
+            $logDAO->registrarLog(
+                $_SESSION['usuario']['id'],
+                'Exclusão de aluno',
+                'alunos',
+                $id,
+                "Aluno excluído: " . $aluno['nome_completo']
+            );
+            
             header("Location: listar_alunos.php");
             exit;
         } catch (PDOException $e) {
@@ -39,6 +54,16 @@ if (isset($_GET['id'])) {
             ];
         
             $alunoDAO->update($id, $dadosAtualizados);
+            
+            // Registra o log da edição
+            $logDAO->registrarLog(
+                $_SESSION['usuario']['id'],
+                'Edição de aluno',
+                'alunos',
+                $id,
+                "Aluno: " . $dadosAtualizados['nome_completo']
+            );
+            
             header("Location: listar_alunos.php");
             exit;
         }

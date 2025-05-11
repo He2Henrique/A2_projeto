@@ -9,11 +9,13 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use App\DAO\MatriculasDAO;
 use App\DAO\TurmasDAO;
 use App\DAO\AlunoDAO;
+use App\DAO\LogDAO;
 
 // Inicializa os DAOs
 $matriculasDAO = new MatriculasDAO();
 $turmasDAO = new TurmasDAO();
 $alunoDAO = new AlunoDAO();
+$logDAO = new LogDAO();
 
 $idAluno = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $mensagem = '';
@@ -50,25 +52,19 @@ try {
                         'status_' => (int)$_POST['status']
                     ];
 
-                    // Verifica se a turma selecionada é compatível com a idade
-                    $turmaSelecionada = array_filter($turmas, function($t) use ($matricula) {
-                        return $t['id'] === $matricula['id_turma'];
-                    });
-                    
-                    if (empty($turmaSelecionada)) {
-                        $erro = "A turma selecionada não é compatível com a idade do aluno.";
+                    if ($matriculasDAO->update($idMatricula, $matricula)) {
+                        // Registra o log da atualização da matrícula
+                        $logDAO->registrarLog(
+                            $_SESSION['usuario']['id'],
+                            'Atualização de matrícula',
+                            'matriculas',
+                            $idMatricula,
+                            "Aluno ID: $idAluno, Turma ID: {$matricula['id_turma']}, Status: {$matricula['status_']}"
+                        );
+                        $mensagem = "Matrícula atualizada com sucesso!";
+                        $matriculas = $matriculasDAO->selectMatriculaByAluno($idAluno);
                     } else {
-                        // Verifica se já existe matrícula ativa para esta turma
-                        if ($matriculasDAO->verificarMatriculaExistente($idAluno, $matricula['id_turma'], $idMatricula)) {
-                            $erro = "Já existe uma matrícula ativa para esta turma.";
-                        } else {
-                            if ($matriculasDAO->update($idMatricula, $matricula)) {
-                                $mensagem = "Matrícula atualizada com sucesso!";
-                                $matriculas = $matriculasDAO->selectMatriculaByAluno($idAluno);
-                            } else {
-                                $erro = "Erro ao atualizar matrícula.";
-                            }
-                        }
+                        $erro = "Erro ao atualizar matrícula.";
                     }
                     break;
 
@@ -102,7 +98,16 @@ try {
                         if ($matriculasDAO->verificarMatriculaExistente($idAluno, $novaMatricula['id_turma'])) {
                             $erro = "Já existe uma matrícula ativa para esta turma.";
                         } else {
-                            if ($matriculasDAO->insert($novaMatricula)) {
+                            $id_matricula = $matriculasDAO->insert($novaMatricula);
+                            if ($id_matricula) {
+                                // Registra o log da nova matrícula
+                                $logDAO->registrarLog(
+                                    $_SESSION['usuario']['id'],
+                                    'Cadastro de matrícula',
+                                    'matriculas',
+                                    $id_matricula,
+                                    "Aluno ID: $idAluno, Turma ID: {$novaMatricula['id_turma']}"
+                                );
                                 $mensagem = "Nova matrícula cadastrada com sucesso!";
                                 $matriculas = $matriculasDAO->selectMatriculaByAluno($idAluno);
                             } else {

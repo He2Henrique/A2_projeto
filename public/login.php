@@ -15,7 +15,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
    
 
     if ($usuario && password_verify($senha, $usuario['senha'])) {
-        $_SESSION['usuario'] = $usuario['nome'];
+        $_SESSION['usuario'] = [
+            'id' => $usuario['id'],
+            'nome' => $usuario['nome'],
+            'email' => $usuario['email'],
+            'admin' => $usuario['admin']
+        ];
         header("Location: index.php"); // Redireciona para a página principal
         exit;
     } else {
