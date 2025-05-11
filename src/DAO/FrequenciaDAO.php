@@ -44,8 +44,7 @@
                     JOIN matriculas m ON a.id = m.id_aluno
                     JOIN turmas t ON m.id_turma = t.id
                     JOIN modalidades modalidade ON t.id_modalidade = modalidade.id
-                    LEFT JOIN frequencia f ON m.id = f.id_matricula
-                    WHERE a.status_ = 1";
+                    LEFT JOIN frequencia f ON m.id = f.id_matricula";
 
             if ($idTurma) {
                 $sql .= " AND t.id = :id_turma";

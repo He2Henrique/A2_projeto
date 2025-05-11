@@ -19,6 +19,7 @@ $turmas = $turmasDAO->selectTurmasModalidadesALL();
 $idTurma = isset($_GET['turma']) ? (int)$_GET['turma'] : null;
 $turmaSelecionada = null;
 
+
 if ($idTurma) {
     foreach ($turmas as $t) {
         if ($t['id'] == $idTurma) {

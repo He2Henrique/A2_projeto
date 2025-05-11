@@ -73,13 +73,21 @@
         }
 
         public function getChamadasByAula($id_aula, $data) {
-            $sql = "SELECT c.*, a.nome_completo 
-                    FROM chamadas c 
-                    JOIN alunos a ON c.id_aluno = a.id 
-                    WHERE c.id_aula = :id_aula AND c.data = :data";
-            $stmt = $this->conn->prepare($sql);
+            $sql = "SELECT 
+                        f.id as id_chamada,
+                        a.nome_completo,
+                        f.presente,
+                        f.justificativa
+                    FROM frequencia f
+                    JOIN matriculas m ON f.id_matricula = m.id
+                    JOIN alunos a ON m.id_aluno = a.id
+                    JOIN aulas au ON f.id_aula = au.id
+                    WHERE au.id = :id_aula 
+                    AND DATE(au.data_) = :data
+                    ORDER BY a.nome_completo";
             
             try {
+                $stmt = $this->conn->prepare($sql);
                 $stmt->bindValue(':id_aula', $id_aula, PDO::PARAM_INT);
                 $stmt->bindValue(':data', $data, PDO::PARAM_STR);
                 $stmt->execute();
@@ -89,12 +97,16 @@
             }
         }
 
-        public function atualizarChamada($id_chamada, $presente) {
-            $sql = "UPDATE chamadas SET presente = :presente WHERE id_chamada = :id_chamada";
-            $stmt = $this->conn->prepare($sql);
+        public function atualizarChamada($id_chamada, $presente, $justificativa = null) {
+            $sql = "UPDATE frequencia 
+                    SET presente = :presente, 
+                        justificativa = :justificativa 
+                    WHERE id = :id_chamada";
             
             try {
+                $stmt = $this->conn->prepare($sql);
                 $stmt->bindValue(':presente', $presente, PDO::PARAM_INT);
+                $stmt->bindValue(':justificativa', $justificativa, PDO::PARAM_STR);
                 $stmt->bindValue(':id_chamada', $id_chamada, PDO::PARAM_INT);
                 return $stmt->execute();
             } catch (PDOException $e) {
@@ -103,12 +115,23 @@
         }
 
         public function getChamadasPorTurma() {
-            $sql = "SELECT c.id_aulas, c.data, COUNT(*) as total_chamadas 
-                    FROM chamada c 
-                    GROUP BY c.id_aulas, c.data";
-            $stmt = $this->conn->prepare($sql);
+            $sql = "SELECT 
+                        a.id as id_aula,
+                        a.data_ as data,
+                        a.hora,
+                        t.id as id_turma,
+                        CONCAT(m.nome, ' - ', m.faixa_etaria, ' - ', t.dia_sem, ' - ', t.horario) as turma_info,
+                        COUNT(f.id) as total_alunos,
+                        SUM(CASE WHEN f.presente = 1 THEN 1 ELSE 0 END) as total_presentes
+                    FROM aulas a
+                    JOIN turmas t ON a.id_turma = t.id
+                    JOIN modalidades m ON t.id_modalidade = m.id
+                    LEFT JOIN frequencia f ON a.id = f.id_aula
+                    GROUP BY a.id, a.data_, a.hora, t.id, m.nome, m.faixa_etaria, t.dia_sem, t.horario
+                    ORDER BY a.data_ DESC, a.hora DESC";
             
             try {
+                $stmt = $this->conn->prepare($sql);
                 $stmt->execute();
                 return $stmt->fetchAll(PDO::FETCH_ASSOC);
             } catch (PDOException $e) {
