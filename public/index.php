@@ -5,7 +5,7 @@ if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");//evitar que o usuario acesse a pagina sem estar logado
     exit;
 }
-print_r($_SESSION['usuario']);
+
 require_once __DIR__.'/../vendor/autoload.php';
 use App\Core\TableBuilder;
 use App\Core\ProcessData;
@@ -74,7 +74,7 @@ if(!empty($turmas)) {
             <div class="d-flex flex-wrap gap-3">
                 <a href="listar_alunos.php" class="btn btn-secondary">👥 Ver Lista de Alunos</a>
                 <a href="cadastrar_aluno.php" class="btn btn-success">➕ Cadastrar Novo Aluno</a>
-                <a href="relatorio_aluno.php" class="btn btn-info">📊 Relatório Geral por Aluno</a>
+                <a href="relatoriogeral.php" class="btn btn-info">📊 Relatório Geral por Aluno</a>
                 <a href="visualizar_chamadas.php" class="btn btn-warning">📑 Visualizar Chamadas</a>
             </div>
         </div>

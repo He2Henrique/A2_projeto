@@ -23,12 +23,26 @@ $id_turma = $_GET['id_turma'] ?? null;
 
 if (isset($id_turma)) {
     $turma = $turmasDAO->selectTurmaModalidade($id_turma);
-    $matriculas = $matriculasDAO->selectMatriculasFromAluno($id_turma);
-    
-    foreach($matriculas as $matricula) {
-        $aluno = $alunoDAO->selectAlunoBYID($matricula['id_aluno']);
-        $alunos[] = $aluno;
-        $matriculas_do_aluno[$matricula['id_aluno']] = $matricula['id'];
+    if (!$turma) {
+        $erro = "Turma não encontrada.";
+    } else {
+        $matriculas = $matriculasDAO->selectMatriculasByTurma($id_turma);
+        
+        // Debug para verificar os dados
+        if (empty($matriculas)) {
+            $erro = "Nenhuma matrícula encontrada para esta turma.";
+        } else {
+            // Não precisamos mais buscar os alunos separadamente pois já vêm com as matrículas
+            $alunos = array_map(function($matricula) {
+                return [
+                    'id' => $matricula['id_aluno'],
+                    'nome_completo' => $matricula['nome_completo']
+                ];
+            }, $matriculas);
+            
+            // Criar um array associativo de id_aluno => id_matricula
+            $matriculas_do_aluno = array_column($matriculas, 'id', 'id_aluno');
+        }
     }
 }
 
@@ -79,11 +93,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_turma)) {
         </div>
 
         <h4 class="mb-4">
-            <?= isset($turma) ? $data->getDate('d-m-y') . " - Turma " . $turma :  'Aula não encontrada' ?>
+            <?php if (isset($turma)): ?>
+                <?= $data->getDate('d-m-y') ?> - 
+                <?= htmlspecialchars($turma['nome'] . ' - ' . $turma['faixa_etaria'] . ' - ' . $turma['dia_sem'] . ' - ' . $turma['horario']) ?>
+            <?php else: ?>
+                Aula não encontrada
+            <?php endif; ?>
         </h4>
 
+        <?php if (isset($erro)): ?>
+        <div class="alert alert-danger">❌ <?= htmlspecialchars($erro) ?></div>
+        <?php endif; ?>
+
         <?php if (isset($mensagem)): ?>
-        <div class="alert alert-success">✅ <?= $mensagem ?></div>
+        <div class="alert alert-success">✅ <?= htmlspecialchars($mensagem) ?></div>
         <?php endif; ?>
 
         <?php if (!empty($alunos)): ?>

@@ -28,7 +28,7 @@ if (!$aluno) {
 }
 
 // Busca matrículas do aluno
-$matriculas = $matriculasDAO->selectMatriculasFromAluno($idAluno);
+$matriculas = $matriculasDAO->selectMatriculasByAluno($idAluno);
 $relatorioFaltas = [];
 
 // Processa cada matrícula
@@ -45,6 +45,9 @@ foreach ($matriculas as $matricula) {
     // Conta faltas
     $faltas = $frequenciaDAO->countFaltas($idMatricula);
 
+    // Busca histórico detalhado de frequência
+    $historicoFrequencia = $frequenciaDAO->getHistoricoFrequenciaAluno($idMatricula);
+
     // Atualiza status se necessário
     if ($faltas >= 3 && $statusMatricula !== 'inativo') {
         $matriculasDAO->atulizarStatusMatricula($idMatricula, 0);
@@ -53,9 +56,16 @@ foreach ($matriculas as $matricula) {
 
     $relatorioFaltas[] = [
         'nome_aluno' => $aluno['nome_completo'],
-        'turma' => $turma,
+        'turma_info' => $turma ? sprintf(
+            '%s - %s - %s - %s',
+            $turma['nome'],
+            $turma['faixa_etaria'],
+            $turma['dia_sem'],
+            $turma['horario']
+        ) : 'Turma não encontrada',
         'faltas' => $faltas,
-        'status_matricula' => $statusMatricula
+        'status_matricula' => $statusMatricula,
+        'historico' => $historicoFrequencia
     ];
 }
 
@@ -95,26 +105,65 @@ usort($relatorioFaltas, fn($a, $b) => $b['faltas'] <=> $a['faltas']);
 
         <div class="card p-4 shadow-sm">
             <h4>Frequência por Turma</h4>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Nome do Aluno</th>
-                        <th>Turma</th>
-                        <th>Faltas</th>
-                        <th>Status na Turma</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($relatorioFaltas as $linha): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($linha['nome_aluno']) ?></td>
-                        <td><?= htmlspecialchars($linha['turma']) ?></td>
-                        <td><?= $linha['faltas'] ?></td>
-                        <td><?= ucfirst($linha['status_matricula']) ?></td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+            <?php foreach ($relatorioFaltas as $linha): ?>
+            <div class="mb-4">
+                <h5 class="border-bottom pb-2">
+                    <?= htmlspecialchars($linha['turma_info']) ?>
+                    <span class="badge bg-<?= $linha['status_matricula'] === 'Ativa' ? 'success' : 'secondary' ?> float-end">
+                        <?= ucfirst($linha['status_matricula']) ?>
+                    </span>
+                </h5>
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Data</th>
+                                <th>Horário</th>
+                                <th>Status</th>
+                                <th>Justificativa</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($linha['historico'])): ?>
+                            <tr>
+                                <td colspan="4" class="text-center">Nenhum registro de frequência encontrado</td>
+                            </tr>
+                            <?php else: ?>
+                                <?php foreach ($linha['historico'] as $registro): ?>
+                                <tr>
+                                    <td><?= date('d/m/Y', strtotime($registro['data_aula'])) ?></td>
+                                    <td><?= date('H:i', strtotime($registro['hora_aula'])) ?></td>
+                                    <td>
+                                        <span class="badge bg-<?= $registro['presente'] ? 'success' : 'danger' ?>">
+                                            <?= $registro['presente'] ? 'Presente' : 'Ausente' ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <?php if (!$registro['presente'] && $registro['justificativa']): ?>
+                                            <small class="text-muted"><?= htmlspecialchars($registro['justificativa']) ?></small>
+                                        <?php else: ?>
+                                            <small class="text-muted">-</small>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <td colspan="2"><strong>Total de Faltas:</strong></td>
+                                <td colspan="2">
+                                    <span class="badge bg-<?= $linha['faltas'] >= 3 ? 'danger' : 'warning' ?>">
+                                        <?= $linha['faltas'] ?> falta(s)
+                                    </span>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </body>
