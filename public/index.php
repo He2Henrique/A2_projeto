@@ -72,10 +72,18 @@ if(!empty($turmas)) {
 
         <div class="card p-3 mb-4 shadow-sm">
             <div class="d-flex flex-wrap gap-3">
+                <?php if (isset($_SESSION['usuario']['admin']) && $_SESSION['usuario']['admin']): ?>
+                <!-- Botões para administradores -->
                 <a href="listar_alunos.php" class="btn btn-secondary">👥 Ver Lista de Alunos</a>
                 <a href="cadastrar_aluno.php" class="btn btn-success">➕ Cadastrar Novo Aluno</a>
                 <a href="relatoriogeral.php" class="btn btn-info">📊 Relatório Geral por Aluno</a>
                 <a href="visualizar_chamadas.php" class="btn btn-warning">📑 Visualizar Chamadas</a>
+                <a href="listar_modalidades.php" class="btn btn-danger">🎯 Gerenciar Modalidades</a>
+                <a href="listar_turmas.php" class="btn btn-primary">📋 Gerenciar Turmas</a>
+                <?php else: ?>
+                <!-- Botões para usuários não-administradores -->
+                <a href="visualizar_chamadas.php" class="btn btn-warning">📑 Visualizar Chamadas</a>
+                <?php endif; ?>
             </div>
         </div>
 
