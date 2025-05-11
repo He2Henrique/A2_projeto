@@ -50,6 +50,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <label>Senha</label>
                             <input type="password" name="senha" class="form-control" required>
                         </div>
+                        <div class="mb-3 form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="admin" id="adminSwitch" value="1">
+                            <label class="form-check-label" for="adminSwitch">Usuário Administrador</label>
+                        </div>
                         <div class="d-grid">
                             <button type="submit" class="btn btn-success">Cadastrar</button>
                         </div>
