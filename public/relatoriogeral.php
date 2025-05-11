@@ -16,34 +16,6 @@ $turmasDAO = new TurmasDAO();
 $matriculasDAO = new MatriculasDAO();
 $logDAO = new LogDAO();
 
-// Processa o formulário de atualização de matrícula
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'toggle_status') {
-    try {
-        $idMatricula = (int)$_POST['id_matricula'];
-        $novoStatus = (int)$_POST['novo_status'];
-        $matricula = [
-            'id_turma' => (int)$_POST['id_turma'],
-            'data_matricula' => $_POST['data_matricula'],
-            'status_' => $novoStatus
-        ];
-
-        if ($matriculasDAO->update($idMatricula, $matricula)) {
-            // Registra o log da atualização da matrícula
-            $logDAO->registrarLog(
-                $_SESSION['usuario']['id'],
-                'Atualização de status da matrícula',
-                'matriculas',
-                $idMatricula,
-                "Matrícula ID: $idMatricula, Status: " . ($novoStatus == 1 ? 'Ativado' : 'Desativado')
-            );
-            $mensagem = "Status da matrícula atualizado com sucesso!";
-        } else {
-            $erro = "Erro ao atualizar status da matrícula.";
-        }
-    } catch (PDOException $e) {
-        $erro = "Erro ao atualizar status da matrícula: " . $e->getMessage();
-    }
-}
 
 // Busca todas as turmas para o filtro
 $turmas = $turmasDAO->selectTurmasModalidadesALL();
@@ -156,39 +128,41 @@ try {
                     </thead>
                     <tbody>
                         <?php foreach ($relatorio as $linha): ?>
-                            <tr class="<?= $linha['status_matricula'] ? '' : 'table-danger' ?>">
-                                <td><?= htmlspecialchars($linha['nome_completo']) ?></td>
-                                <td><?= htmlspecialchars($linha['turma_info']) ?></td>
-                                <td><?= date('d/m/Y', strtotime($linha['data_matricula'])) ?></td>
-                                <td>
-                                    <span class="badge bg-<?= $linha['total_faltas'] >= 3 ? 'danger' : 'warning' ?>">
-                                        <?= $linha['total_faltas'] ?> falta(s)
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge bg-info">
-                                        <?= $linha['total_faltas_justificadas'] ?> falta(s) justificada(s)
-                                    </span>
-                                </td>
-                                <td>
-                                    <form method="POST" class="d-inline">
-                                        <input type="hidden" name="action" value="toggle_status">
-                                        <input type="hidden" name="id_matricula" value="<?= $linha['id_matricula'] ?>">
-                                        <input type="hidden" name="id_turma" value="<?= $linha['id_turma'] ?>">
-                                        <input type="hidden" name="data_matricula" value="<?= $linha['data_matricula'] ?>">
-                                        <input type="hidden" name="novo_status" value="<?= $linha['status_matricula'] ? '0' : '1' ?>">
-                                        <button type="submit" class="btn btn-sm btn-<?= $linha['status_matricula'] ? 'success' : 'danger' ?>">
-                                            <?= $linha['status_matricula'] ? 'Ativo' : 'Inativo' ?>
-                                        </button>
-                                    </form>
-                                </td>
-                                <td>
-                                    <a href="relatorio_detalhado.php?id_matricula=<?= $linha['id_matricula'] ?>" 
-                                       class="btn btn-sm btn-info">
-                                        Ver Detalhes
-                                    </a>
-                                </td>
-                            </tr>
+                        <tr class="<?= $linha['status_matricula'] ? '' : 'table-danger' ?>">
+                            <td><?= htmlspecialchars($linha['nome_completo']) ?></td>
+                            <td><?= htmlspecialchars($linha['turma_info']) ?></td>
+                            <td><?= date('d/m/Y', strtotime($linha['data_matricula'])) ?></td>
+                            <td>
+                                <span class="badge bg-<?= $linha['total_faltas'] >= 3 ? 'danger' : 'warning' ?>">
+                                    <?= $linha['total_faltas'] ?> falta(s)
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">
+                                    <?= $linha['total_faltas_justificadas'] ?> falta(s) justificada(s)
+                                </span>
+                            </td>
+                            <td>
+                                <form method="POST" class="d-inline">
+                                    <input type="hidden" name="action" value="toggle_status">
+                                    <input type="hidden" name="id_matricula" value="<?= $linha['id_matricula'] ?>">
+                                    <input type="hidden" name="id_turma" value="<?= $linha['id_turma'] ?>">
+                                    <input type="hidden" name="data_matricula" value="<?= $linha['data_matricula'] ?>">
+                                    <input type="hidden" name="novo_status"
+                                        value="<?= $linha['status_matricula'] ? '0' : '1' ?>">
+                                    <button type="submit"
+                                        class="btn btn-sm btn-<?= $linha['status_matricula'] ? 'success' : 'danger' ?>">
+                                        <?= $linha['status_matricula'] ? 'Ativo' : 'Inativo' ?>
+                                    </button>
+                                </form>
+                            </td>
+                            <td>
+                                <a href="relatorio_detalhado.php?id_matricula=<?= $linha['id_matricula'] ?>"
+                                    class="btn btn-sm btn-info">
+                                    Ver Detalhes
+                                </a>
+                            </td>
+                        </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
@@ -205,13 +179,7 @@ try {
         <?php endif; ?>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-    function confirmarAlteracaoStatus(form) {
-        const novoStatus = form.querySelector('input[name="novo_status"]').value;
-        const acao = novoStatus == 1 ? 'ativar' : 'desativar';
-        return confirm(`Tem certeza que deseja ${acao} esta matrícula?`);
-    }
-    </script>
+
 </body>
 
 </html>

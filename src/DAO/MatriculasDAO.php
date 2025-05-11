@@ -72,19 +72,15 @@
             }
         }
 
-        public function update($id, $matricula) {
+        public function updateStatus($id, $novoStatus) {
             $sql = "UPDATE matriculas 
-                    SET id_turma = :id_turma, 
-                        data_matricula = :data_matricula, 
-                        status_ = :status_
+                    SET  status_ = :status_
                     WHERE id = :id";
             
             try {
                 $stmt = $this->conn->prepare($sql);
                 $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-                $stmt->bindValue(':id_turma', $matricula['id_turma'], PDO::PARAM_INT);
-                $stmt->bindValue(':data_matricula', $matricula['data_matricula']);
-                $stmt->bindValue(':status_', $matricula['status_'], PDO::PARAM_INT);
+                $stmt->bindValue(':status_', $novoStatus, PDO::PARAM_INT);
                 return $stmt->execute();
             } catch (PDOException $e) {
                 $errorCode = (int)$e->getCode();

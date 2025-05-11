@@ -36,7 +36,7 @@
         public function TurmasHJ(){
             $sql = "SELECT * from turmas where dia_sem = :diaSemana";
             $stmt = $this->conn->prepare($sql);
-            $stmt->bindValue(':diaSemana', 'terça', PDO::PARAM_STR);
+            $stmt->bindValue(':diaSemana', $this->diasemana, PDO::PARAM_STR);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }

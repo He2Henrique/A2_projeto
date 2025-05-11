@@ -48,11 +48,6 @@ foreach ($matriculas as $matricula) {
     // Busca histórico detalhado de frequência
     $historicoFrequencia = $frequenciaDAO->getHistoricoFrequenciaAluno($idMatricula);
 
-    // Atualiza status se necessário
-    if ($faltas >= 3 && $statusMatricula !== 'inativo') {
-        $matriculasDAO->atulizarStatusMatricula($idMatricula, 0);
-        $statusMatricula = 'inativo';
-    }
 
     $relatorioFaltas[] = [
         'nome_aluno' => $aluno['nome_completo'],
@@ -69,16 +64,8 @@ foreach ($matriculas as $matricula) {
     ];
 }
 
-// Verifica se todas as matrículas estão inativas
-$todasInativas = !empty($relatorioFaltas) && array_reduce($relatorioFaltas, function ($carry, $item) {
-    return $carry && $item['status_matricula'] === 'inativo';
-}, true);
 
-// Atualiza status do aluno se necessário
-if ($todasInativas && $aluno['status_'] !== 'inativo') {
-    $alunoDAO->updateStatus($idAluno, 'inativo');
-    $aluno['status_'] = 'inativo';
-}
+
 
 // Ordena por número de faltas (decrescente)
 usort($relatorioFaltas, fn($a, $b) => $b['faltas'] <=> $a['faltas']);
@@ -109,11 +96,12 @@ usort($relatorioFaltas, fn($a, $b) => $b['faltas'] <=> $a['faltas']);
             <div class="mb-4">
                 <h5 class="border-bottom pb-2">
                     <?= htmlspecialchars($linha['turma_info']) ?>
-                    <span class="badge bg-<?= $linha['status_matricula'] === 'Ativa' ? 'success' : 'secondary' ?> float-end">
+                    <span
+                        class="badge bg-<?= $linha['status_matricula'] === 'Ativa' ? 'success' : 'secondary' ?> float-end">
                         <?= ucfirst($linha['status_matricula']) ?>
                     </span>
                 </h5>
-                
+
                 <div class="table-responsive">
                     <table class="table table-bordered table-sm">
                         <thead class="table-light">
@@ -130,24 +118,25 @@ usort($relatorioFaltas, fn($a, $b) => $b['faltas'] <=> $a['faltas']);
                                 <td colspan="4" class="text-center">Nenhum registro de frequência encontrado</td>
                             </tr>
                             <?php else: ?>
-                                <?php foreach ($linha['historico'] as $registro): ?>
-                                <tr>
-                                    <td><?= date('d/m/Y', strtotime($registro['data_aula'])) ?></td>
-                                    <td><?= date('H:i', strtotime($registro['hora_aula'])) ?></td>
-                                    <td>
-                                        <span class="badge bg-<?= $registro['presente'] ? 'success' : 'danger' ?>">
-                                            <?= $registro['presente'] ? 'Presente' : 'Ausente' ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <?php if (!$registro['presente'] && $registro['justificativa']): ?>
-                                            <small class="text-muted"><?= htmlspecialchars($registro['justificativa']) ?></small>
-                                        <?php else: ?>
-                                            <small class="text-muted">-</small>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
+                            <?php foreach ($linha['historico'] as $registro): ?>
+                            <tr>
+                                <td><?= date('d/m/Y', strtotime($registro['data_aula'])) ?></td>
+                                <td><?= date('H:i', strtotime($registro['hora_aula'])) ?></td>
+                                <td>
+                                    <span class="badge bg-<?= $registro['presente'] ? 'success' : 'danger' ?>">
+                                        <?= $registro['presente'] ? 'Presente' : 'Ausente' ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <?php if (!$registro['presente'] && $registro['justificativa']): ?>
+                                    <small
+                                        class="text-muted"><?= htmlspecialchars($registro['justificativa']) ?></small>
+                                    <?php else: ?>
+                                    <small class="text-muted">-</small>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
                             <?php endif; ?>
                         </tbody>
                         <tfoot class="table-light">
