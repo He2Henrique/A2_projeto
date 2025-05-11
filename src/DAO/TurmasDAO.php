@@ -9,10 +9,12 @@
 
         private $conn;
         private $data;
+        private $diasemana;
 
         public function __construct() {
             $this->conn = DatabaseManager::getInstance()->getConnection();
             $this->data = new ProcessData();
+            $this->diasemana = $this->data->getDiaSemana();
         }
 
         public function selectTurmasALL() {
@@ -34,7 +36,7 @@
         public function TurmasHJ(){
             $sql = "SELECT * from turmas where dia_sem = :diaSemana";
             $stmt = $this->conn->prepare($sql);
-            $stmt->bindValue(':diaSemana', $this->data->getDiaSemana(), PDO::PARAM_STR);
+            $stmt->bindValue(':diaSemana', 'terça', PDO::PARAM_STR);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }

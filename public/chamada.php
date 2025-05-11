@@ -103,6 +103,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_turma)) {
     <meta charset="UTF-8">
     <title>Registrar Chamada</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .justificativa-field {
+            display: none;
+        }
+    </style>
 </head>
 
 <body class="bg-light">
@@ -143,14 +148,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_turma)) {
                     <tr>
                         <td><?= $aluno['nome_completo'] ?></td>
                         <td>
-                            <select name="presenca[<?= $aluno['id'] ?>]" class="form-select" required>
+                            <select name="presenca[<?= $aluno['id'] ?>]" class="form-select presenca-select" required 
+                                    onchange="toggleJustificativa(this, <?= $aluno['id'] ?>)">
                                 <option value="presente">Presente</option>
                                 <option value="ausente">Ausente</option>
                             </select>
                         </td>
                         <td>
-                            <textarea name="justificativa[<?= $aluno['id'] ?>]" class="form-control" rows="1"
-                                placeholder="Se houver justificativa..."></textarea>
+                            <textarea name="justificativa[<?= $aluno['id'] ?>]" 
+                                      class="form-control justificativa-field" 
+                                      id="justificativa_<?= $aluno['id'] ?>"
+                                      rows="1"
+                                      placeholder="Se houver justificativa..."></textarea>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -166,6 +175,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_turma)) {
         <div class="alert alert-danger">Aula não encontrada. Verifique os parâmetros da URL.</div>
         <?php endif; ?>
     </div>
+    <script>
+        function toggleJustificativa(selectElement, alunoId) {
+            const justificativaField = document.getElementById('justificativa_' + alunoId);
+            if (selectElement.value === 'ausente') {
+                justificativaField.style.display = 'block';
+            } else {
+                justificativaField.style.display = 'none';
+                justificativaField.value = ''; // Limpa o campo quando presente
+            }
+        }
+
+        // Inicializa os campos quando a página carrega
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.presenca-select').forEach(select => {
+                const alunoId = select.getAttribute('onchange').match(/\d+/)[0];
+                toggleJustificativa(select, alunoId);
+            });
+        });
+    </script>
 </body>
 
 </html>
