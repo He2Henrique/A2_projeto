@@ -31,12 +31,14 @@ if(!empty($turmas)) {
     
     $matriz = [];
     foreach ($turmas as $turma) {
+        
         if (in_array($turma['id'], $aulas_turmas_ragistradas)) {
             // Procura o índice do id_turma correspondente no array $aulas
             $indice = array_search($turma['id'], $aulas_turmas_ragistradas);
+            
             if ($indice !== false) {
                 $id_aula = $aulas[$indice]['id']; // Obtém o id correspondente
-                $button = $builder->CriarButao('editar_chamada.php?id_turma=' . $id_aula, 'Editar chamada', 'btn btn-info btn-sm');
+                $button = $builder->CriarButao('visualizar_chamadas.php' , 'Realizada', 'btn btn-info btn-sm');
             }
         } else {
             $button = $builder->CriarButao('chamada.php?id_turma=' . $turma['id'], 'Registrar Chamada', 'btn btn-sm btn-success');

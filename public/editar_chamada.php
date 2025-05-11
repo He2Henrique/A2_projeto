@@ -82,69 +82,69 @@ try {
         </div>
 
         <?php if (isset($erro)): ?>
-            <div class="alert alert-danger"><?= htmlspecialchars($erro) ?></div>
+        <div class="alert alert-danger"><?= htmlspecialchars($erro) ?></div>
         <?php endif; ?>
 
         <?php if (isset($mensagem)): ?>
-            <div class="alert alert-success"><?= htmlspecialchars($mensagem) ?></div>
+        <div class="alert alert-success"><?= htmlspecialchars($mensagem) ?></div>
         <?php endif; ?>
 
         <?php if (!isset($erro) && !empty($chamadas)): ?>
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        Chamada de <?= date('d/m/Y', strtotime($data)) ?> - 
-                        <?= date('H:i', strtotime($aula['hora'])) ?>
-                    </h5>
-                </div>
-                <form method="POST" class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Aluno</th>
-                                    <th>Presença</th>
-                                    <th>Justificativa</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($chamadas as $chamada): ?>
-                                    <tr>
-                                        <td><?= htmlspecialchars($chamada['nome_completo']) ?></td>
-                                        <td>
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" 
-                                                       name="presencas[<?= $chamada['id_chamada'] ?>]" 
-                                                       value="1" 
-                                                       <?= $chamada['presente'] ? 'checked' : '' ?> 
-                                                       id="presente_<?= $chamada['id_chamada'] ?>">
-                                                <label class="form-check-label" for="presente_<?= $chamada['id_chamada'] ?>">Presente</label>
-                                            </div>
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" 
-                                                       name="presencas[<?= $chamada['id_chamada'] ?>]" 
-                                                       value="0" 
-                                                       <?= !$chamada['presente'] ? 'checked' : '' ?> 
-                                                       id="ausente_<?= $chamada['id_chamada'] ?>">
-                                                <label class="form-check-label" for="ausente_<?= $chamada['id_chamada'] ?>">Ausente</label>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <input type="text" class="form-control" 
-                                                   name="justificativas[<?= $chamada['id_chamada'] ?>]" 
-                                                   value="<?= htmlspecialchars($chamada['justificativa'] ?? '') ?>" 
-                                                   placeholder="Justificativa (opcional)">
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="text-end mt-3">
-                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                    </div>
-                </form>
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    Chamada de <?= date('d/m/Y', strtotime($data)) ?> -
+                    <?= date('H:i', strtotime($aula['hora'])) ?>
+                </h5>
             </div>
+            <form method="POST" class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Aluno</th>
+                                <th>Presença</th>
+                                <th>Justificativa</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($chamadas as $chamada): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($chamada['nome_completo']) ?></td>
+                                <td>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio"
+                                            name="presencas[<?= $chamada['id_chamada'] ?>]" value="1"
+                                            <?= $chamada['presente'] ? 'checked' : '' ?>
+                                            id="presente_<?= $chamada['id_chamada'] ?>">
+                                        <label class="form-check-label"
+                                            for="presente_<?= $chamada['id_chamada'] ?>">Presente</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio"
+                                            name="presencas[<?= $chamada['id_chamada'] ?>]" value="0"
+                                            <?= !$chamada['presente'] ? 'checked' : '' ?>
+                                            id="ausente_<?= $chamada['id_chamada'] ?>">
+                                        <label class="form-check-label"
+                                            for="ausente_<?= $chamada['id_chamada'] ?>">Ausente</label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control"
+                                        name="justificativas[<?= $chamada['id_chamada'] ?>]"
+                                        value="<?= htmlspecialchars($chamada['justificativa'] ?? '') ?>"
+                                        placeholder="Justificativa (opcional)">
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-end mt-3">
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
         <?php endif; ?>
     </div>
 </body>

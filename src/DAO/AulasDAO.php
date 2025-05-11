@@ -16,9 +16,9 @@
         }
 
         public function AulasRealizadasHJ(){
-            $sql = "SELECT * from turmas where dia_sem = :diaSemana";
+            $sql = "SELECT * from aulas where data_ = :dataHJ";
             $stmt = $this->conn->prepare($sql);
-            $stmt->bindValue(':diaSemana', $this->data->getDiaSemana(), PDO::PARAM_STR);
+            $stmt->bindValue(':dataHJ', $this->data->getdate('y-m-d'), PDO::PARAM_STR);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
