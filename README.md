@@ -1,6 +1,9 @@
 # 📋SISTEMA DE CHAMADAS PARA CONTROLE DE PRESENÇAS
 Este projeto foi desenvolvido como parte de um trabalho acadêmico, com o objetivo de criar uma aplicação web para o controle de presenças dos alunos de uma instituição que oferece aulas de balé e luta, substituindo o antigo processo manual em papel.
 
+https://github.com/user-attachments/assets/ab0ef4f6-f252-4c09-9955-86c5fc397357
+
+
 ## ⚙️Tecnologias Utilizadas:
 - PHP (BackEnd)
 - MySQL (Banco de Dados)
