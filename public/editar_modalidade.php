@@ -155,7 +155,7 @@ try {
 
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-primary">Atualizar Modalidade</button>
-                                <a href="index.php" class="btn btn-secondary">Voltar</a>
+                                <a href="listar_modalidades.php" class="btn btn-secondary">Voltar</a>
                             </div>
                         </form>
                         <?php endif; ?>
