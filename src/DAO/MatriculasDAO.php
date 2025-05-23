@@ -7,11 +7,10 @@
 
     class MatriculasDAO {
         private $conn;
-        private $data;
+        
 
         public function __construct() {
             $this->conn = DatabaseManager::getInstance()->getConnection();
-            $this->data = new ProcessData;
         }
 
         public function selectMatriculaByAluno($idAluno) {
@@ -72,15 +71,19 @@
             }
         }
 
-        public function updateStatus($id, $novoStatus) {
+        public function update($dadosAtualizados) {
             $sql = "UPDATE matriculas 
-                    SET  status_ = :status_
+                    SET status_ =        :status_ , 
+                        data_matricula = :data_matricula ,
+                        id_turma =       :id_turma
                     WHERE id = :id";
             
             try {
                 $stmt = $this->conn->prepare($sql);
-                $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-                $stmt->bindValue(':status_', $novoStatus, PDO::PARAM_INT);
+                $stmt->bindValue(':id',            $dadosAtualizados['id_matricula'],  PDO::PARAM_INT);
+                $stmt->bindValue(':id_turma',      $dadosAtualizados['id_turma'],      PDO::PARAM_INT);
+                $stmt->bindValue(':status_',       $dadosAtualizados['status'],        PDO::PARAM_INT);
+                $stmt->bindValue(':data_matricula',$dadosAtualizados['data_matricula'],PDO::PARAM_STR);
                 return $stmt->execute();
             } catch (PDOException $e) {
                 $errorCode = (int)$e->getCode();

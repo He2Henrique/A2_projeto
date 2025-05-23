@@ -28,7 +28,7 @@ try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'toggle_status') {
         $idMatricula = (int)$_GET['id_matricula'];
         $novoStatus = (int)$_POST['novo_status'];
-        if ($matriculasDAO->updateStatus($idMatricula, $novoStatus)) {
+        if ($matriculasDAO->atulizarStatusMatricula($idMatricula, $novoStatus)) {
             // Registra o log da atualização da matrícula
             $logDAO->registrarLog(
                 $_SESSION['usuario']['id'],

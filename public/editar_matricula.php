@@ -45,21 +45,15 @@ try {
         if (isset($_POST['action'])) {
             switch ($_POST['action']) {
                 case 'update':
-                    $idMatricula = (int)$_POST['id_matricula'];
-                    $matricula = [
-                        'id_turma' => (int)$_POST['id_turma'],
-                        'data_matricula' => $_POST['data_matricula'],
-                        'status_' => (int)$_POST['status']
-                    ];
-
-                    if ($matriculasDAO->update($idMatricula, $matricula)) {
+                    
+                    if ($matriculasDAO->update($_POST)) {
                         // Registra o log da atualização da matrícula
                         $logDAO->registrarLog(
                             $_SESSION['usuario']['id'],
                             'Atualização de matrícula',
                             'matriculas',
-                            $idMatricula,
-                            "Aluno ID: $idAluno, Turma ID: {$matricula['id_turma']}, Status: {$matricula['status_']}"
+                            (int)$_POST['id_matricula'],
+                            "Aluno ID: $idAluno, Turma ID: {$_POST['id_turma']}, Status: {$_POST['status']}"
                         );
                         $mensagem = "Matrícula atualizada com sucesso!";
                         $matriculas = $matriculasDAO->selectMatriculaByAluno($idAluno);
@@ -203,7 +197,8 @@ try {
                     <tbody>
                         <?php foreach ($matriculas as $matricula): ?>
                         <tr>
-                            <td><?= htmlspecialchars($matricula['nome_modalidade'] . ' - ' . $matricula['faixa_etaria'] . ' - ' . $matricula['dia_sem'] . ' - ' . $matricula['horario']) ?></td>
+                            <td><?= htmlspecialchars($matricula['nome_modalidade'] . ' - ' . $matricula['faixa_etaria'] . ' - ' . $matricula['dia_sem'] . ' - ' . $matricula['horario']) ?>
+                            </td>
                             <td><?= date('d/m/Y', strtotime($matricula['data_matricula'])) ?></td>
                             <td>
                                 <span class="badge bg-<?= $matricula['status_'] == 1 ? 'success' : 'secondary' ?>">
