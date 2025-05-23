@@ -7,7 +7,6 @@ if (!isset($_SESSION['usuario'])) {
 require_once __DIR__.'/../vendor/autoload.php';
 
 use App\Core\TableBuilder;
-use App\Core\ProcessData;
 use App\DAO\AulasDAO;
 use App\DAO\TurmasDAO;
 use App\DAO\MatriculasDAO;
@@ -19,7 +18,7 @@ $turmasDAO = new TurmasDAO();
 $matriculasDAO = new MatriculasDAO();
 $alunoDAO = new AlunoDAO();
 $logDAO = new LogDAO();
-$data = new ProcessData();
+
 
 $id_turma = $_GET['id_turma'] ?? null;
 
@@ -104,9 +103,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_turma)) {
     <title>Registrar Chamada</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .justificativa-field {
-            display: none;
-        }
+    .justificativa-field {
+        display: none;
+    }
     </style>
 </head>
 
@@ -119,10 +118,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_turma)) {
 
         <h4 class="mb-4">
             <?php if (isset($turma)): ?>
-                <?= $data->getDate('d-m-y') ?> - 
-                <?= htmlspecialchars($turma['nome'] . ' - ' . $turma['faixa_etaria'] . ' - ' . $turma['dia_sem'] . ' - ' . $turma['horario']) ?>
+            <?= $data->getDate('d-m-y') ?> -
+            <?= htmlspecialchars($turma['nome'] . ' - ' . $turma['faixa_etaria'] . ' - ' . $turma['dia_sem'] . ' - ' . $turma['horario']) ?>
             <?php else: ?>
-                Aula não encontrada
+            Aula não encontrada
             <?php endif; ?>
         </h4>
 
@@ -148,18 +147,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_turma)) {
                     <tr>
                         <td><?= $aluno['nome_completo'] ?></td>
                         <td>
-                            <select name="presenca[<?= $aluno['id'] ?>]" class="form-select presenca-select" required 
-                                    onchange="toggleJustificativa(this, <?= $aluno['id'] ?>)">
+                            <select name="presenca[<?= $aluno['id'] ?>]" class="form-select presenca-select" required
+                                onchange="toggleJustificativa(this, <?= $aluno['id'] ?>)">
                                 <option value="presente">Presente</option>
                                 <option value="ausente">Ausente</option>
                             </select>
                         </td>
                         <td>
-                            <textarea name="justificativa[<?= $aluno['id'] ?>]" 
-                                      class="form-control justificativa-field" 
-                                      id="justificativa_<?= $aluno['id'] ?>"
-                                      rows="1"
-                                      placeholder="Se houver justificativa..."></textarea>
+                            <textarea name="justificativa[<?= $aluno['id'] ?>]" class="form-control justificativa-field"
+                                id="justificativa_<?= $aluno['id'] ?>" rows="1"
+                                placeholder="Se houver justificativa..."></textarea>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -176,23 +173,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_turma)) {
         <?php endif; ?>
     </div>
     <script>
-        function toggleJustificativa(selectElement, alunoId) {
-            const justificativaField = document.getElementById('justificativa_' + alunoId);
-            if (selectElement.value === 'ausente') {
-                justificativaField.style.display = 'block';
-            } else {
-                justificativaField.style.display = 'none';
-                justificativaField.value = ''; // Limpa o campo quando presente
-            }
+    function toggleJustificativa(selectElement, alunoId) {
+        const justificativaField = document.getElementById('justificativa_' + alunoId);
+        if (selectElement.value === 'ausente') {
+            justificativaField.style.display = 'block';
+        } else {
+            justificativaField.style.display = 'none';
+            justificativaField.value = ''; // Limpa o campo quando presente
         }
+    }
 
-        // Inicializa os campos quando a página carrega
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.presenca-select').forEach(select => {
-                const alunoId = select.getAttribute('onchange').match(/\d+/)[0];
-                toggleJustificativa(select, alunoId);
-            });
+    // Inicializa os campos quando a página carrega
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.presenca-select').forEach(select => {
+            const alunoId = select.getAttribute('onchange').match(/\d+/)[0];
+            toggleJustificativa(select, alunoId);
         });
+    });
     </script>
 </body>
 

@@ -8,6 +8,8 @@ if (!isset($_SESSION['usuario'])) {
 require_once __DIR__.'/../vendor/autoload.php';
 use App\Core\ProcessData;
 use App\DAO\AlunoDAO;
+use App\Core\Datatypes\Idade;
+
 
 $alunoDAO = new AlunoDAO();
 $datafunction = new ProcessData();
@@ -45,7 +47,7 @@ try {
         </div>
 
         <?php if (isset($erro)): ?>
-            <div class="alert alert-danger"><?= htmlspecialchars($erro) ?></div>
+        <div class="alert alert-danger"><?= htmlspecialchars($erro) ?></div>
         <?php endif; ?>
 
         <!-- Formulário de busca -->
@@ -75,23 +77,29 @@ try {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($alunos as $aluno): ?>
+                    <?php foreach ($alunos as $aluno):
+                        $idade = new Idade($aluno['data_nas']); ?>
                     <tr>
                         <td><?= htmlspecialchars($aluno['nome_completo']) ?></td>
-                        <td><?= !empty($aluno['nome_soci']) ? htmlspecialchars($aluno['nome_soci']) : 'Não possui' ?></td>
-                        <td><?= $datafunction->Idade($aluno['data_nas']) ?></td>
-                        <td><?= !empty($aluno['nome_respon']) ? htmlspecialchars($aluno['nome_respon']) : 'Não possui' ?></td>
+                        <td><?= !empty($aluno['nome_soci']) ? htmlspecialchars($aluno['nome_soci']) : 'Não possui' ?>
+                        </td>
+                        <td><?= $idade->getIdade() ?></td>
+                        <td><?= !empty($aluno['nome_respon']) ? htmlspecialchars($aluno['nome_respon']) : 'Não possui' ?>
+                        </td>
                         <td><?= htmlspecialchars($aluno['numero']) ?></td>
                         <td><?= !empty($aluno['email']) ? htmlspecialchars($aluno['email']) : 'Não possui' ?></td>
                         <td>
                             <div class="btn-group" role="group">
-                                <a href="editar_aluno.php?id=<?= $aluno['id'] ?>" class="btn btn-warning btn-sm" title="Editar aluno">
+                                <a href="editar_aluno.php?id=<?= $aluno['id'] ?>" class="btn btn-warning btn-sm"
+                                    title="Editar aluno">
                                     ✏️
                                 </a>
-                                <a href="editar_matricula.php?id=<?= $aluno['id'] ?>" class="btn btn-info btn-sm" title="Gerenciar turmas">
+                                <a href="editar_matricula.php?id=<?= $aluno['id'] ?>" class="btn btn-info btn-sm"
+                                    title="Gerenciar turmas">
                                     🎓
                                 </a>
-                                <a href="relatorio_aluno.php?id=<?= $aluno['id'] ?>" class="btn btn-primary btn-sm" title="Ver relatório">
+                                <a href="relatorio_aluno.php?id=<?= $aluno['id'] ?>" class="btn btn-primary btn-sm"
+                                    title="Ver relatório">
                                     📊
                                 </a>
                             </div>

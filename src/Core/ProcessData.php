@@ -1,6 +1,6 @@
 <?php
 namespace App\Core;
-use Datetime;
+use DateTime; // Importando a classe DateTime para manipulação de datas
 use Exception; // Importando a classe Exception para tratamento de erros
 
 date_default_timezone_set('America/Sao_Paulo'); // Definindo o fuso horário para São Paulo
@@ -37,48 +37,5 @@ class ProcessData{
         return $this->SEMANA[$DIA_SEM];
     }
 
-
-    public function validarCPF(string $cpf): bool{
-        $cpf = preg_replace('/[^0-9]/', '', $cpf);
-        
-        if (strlen($cpf) != 11 || preg_match('/(\d)\1{10}/', $cpf)) {
-            return false;
-        }
-        
-        // Calcula dígitos verificadores
-        for ($t = 9; $t < 11; $t++) {
-            for ($d = 0, $c = 0; $c < $t; $c++) {
-                $d += $cpf[$c] * (($t + 1) - $c);
-            }
-            $d = ((10 * $d) % 11) % 10;
-            if ($cpf[$c] != $d) {
-                return false;
-            }
-        }
-        
-        return true;
-    }
-    
-    public function validarTelefone(string $telefone): bool{
-        // Remove caracteres não numéricos
-        $telefone = preg_replace('/[^0-9]/', '', $telefone);
-        
-        // Verifica se o telefone tem 10 ou 11 dígitos (DDD + número)
-        return (strlen($telefone) == 10 || strlen($telefone) == 11);
-    }
-
-    //exemplo cpf de 000.000.000-00 para 00000000000
-    public function ApenasNumeros(string $string): string{
-        $string_nums = preg_replace('/[^0-9]/', '', $string);
-        
-        return $string_nums;
-    }
-
-    public function Idade(string $data_nasc): int{
-        $data_nasc = DateTime::createFromFormat('Y-m-d', $data_nasc);
-        $hoje = new DateTime();
-        
-        return $hoje->diff($data_nasc)->y;
-    }
     
 }

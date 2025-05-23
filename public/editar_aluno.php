@@ -7,6 +7,7 @@ if (!isset($_SESSION['usuario'])) {
 require_once __DIR__.'/../vendor/autoload.php';
 use App\DAO\AlunoDAO;
 use App\DAO\LogDAO;
+use App\Core\AlunoRequest;
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
@@ -44,18 +45,11 @@ if (isset($_GET['id'])) {
         }
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['delete'])) {
-            $dadosAtualizados = [
-                'nome_completo' => $_POST['nome_completo'],
-                'nome_social' => $_POST['nome_social'],
-                'data_nascimento' => $_POST['data_nascimento'],
-                'nome_responsavel' => $_POST['nome_responsavel'],
-                'telefone' => $_POST['telefone'],
-                'email' => $_POST['email']
-            ];
-        
-            $alunoDAO->update($id, $dadosAtualizados);
             
-            // Registra o log da edição
+            $dadosAtualizadosAluno = new AlunoRequest($_POST);
+        
+            $alunoDAO->update($id, $dadosAtualizadosAluno);
+            
             $logDAO->registrarLog(
                 $_SESSION['usuario']['id'],
                 'Edição de aluno',
@@ -92,19 +86,20 @@ if (isset($_GET['id'])) {
         </div>
 
         <?php if (isset($erro)): ?>
-            <div class="alert alert-danger"><?= $erro ?></div>
+        <div class="alert alert-danger"><?= $erro ?></div>
         <?php endif; ?>
 
         <form method="POST" class="card p-4 shadow-sm">
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label>Nome completo</label>
-                    <input type="text" name="nome_completo" class="form-control" value="<?= htmlspecialchars($aluno['nome_completo']) ?>"
-                        required>
+                    <input type="text" name="nome_completo" class="form-control"
+                        value="<?= htmlspecialchars($aluno['nome_completo']) ?>" required>
                 </div>
                 <div class="col-md-6">
                     <label>Nome social</label>
-                    <input type="text" name="nome_social" class="form-control" value="<?= htmlspecialchars($aluno['nome_soci'] ?? '') ?>">
+                    <input type="text" name="nome_social" class="form-control"
+                        value="<?= htmlspecialchars($aluno['nome_soci'] ?? '') ?>">
                 </div>
             </div>
 
@@ -124,8 +119,8 @@ if (isset($_GET['id'])) {
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label>Telefone</label>
-                    <input type="text" name="telefone" class="form-control" value="<?= htmlspecialchars($aluno['numero']) ?>"
-                        required>
+                    <input type="text" name="telefone" class="form-control"
+                        value="<?= htmlspecialchars($aluno['numero']) ?>" required>
                     <script>
                     // validador de telefone
                     const telefoneInput = document.querySelector('input[name="telefone"]');
@@ -141,7 +136,8 @@ if (isset($_GET['id'])) {
                 </div>
                 <div class="col-md-6">
                     <label>Email</label>
-                    <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($aluno['email'] ?? '') ?>">
+                    <input type="email" name="email" class="form-control"
+                        value="<?= htmlspecialchars($aluno['email'] ?? '') ?>">
                 </div>
             </div>
 
