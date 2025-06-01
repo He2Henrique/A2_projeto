@@ -1,7 +1,8 @@
 <?php 
     namespace App\DAO;
     use App\Core\DatabaseManager;
-    use PDO;
+use App\Core\Datatypes\Data;
+use PDO;
     use PDOException;
     use App\Core\ProcessData;
 
@@ -12,13 +13,13 @@
 
         public function __construct() {
             $this->conn = DatabaseManager::getInstance()->getConnection();
-            $this->data = new ProcessData();
+            $this->data = new Data();
         }
 
         public function AulasRealizadasHJ(){
             $sql = "SELECT * from aulas where data_ = :dataHJ";
             $stmt = $this->conn->prepare($sql);
-            $stmt->bindValue(':dataHJ', $this->data->getdate('y-m-d'), PDO::PARAM_STR);
+            $stmt->bindValue(':dataHJ', $this->data->getDataString(), PDO::PARAM_STR);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
@@ -29,7 +30,7 @@
             
             try {
                 $stmt = $this->conn->prepare($sql);
-                $stmt->bindValue(':data_', $this->data->getDate('y-m-d'), PDO::PARAM_STR);
+                $stmt->bindValue(':data_', $this->data->getDataString(), PDO::PARAM_STR);
                 $stmt->bindValue(':id_turma', $id_turma, PDO::PARAM_INT);
                 $stmt->bindValue(':hora', $this->data->getHorario(), PDO::PARAM_STR);
                 $stmt->bindValue(':id_usuario', $id_usuario, PDO::PARAM_INT);

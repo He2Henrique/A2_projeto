@@ -6,13 +6,11 @@ if (!isset($_SESSION['usuario'])) {
 }
 
 require_once __DIR__.'/../vendor/autoload.php';
-use App\Core\ProcessData;
 use App\DAO\AlunoDAO;
 use App\Core\Datatypes\Idade;
 
 
 $alunoDAO = new AlunoDAO();
-$datafunction = new ProcessData();
 
 $busca = isset($_GET['busca']) ? trim($_GET['busca']) : '';
 

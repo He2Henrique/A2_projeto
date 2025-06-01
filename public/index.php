@@ -7,14 +7,15 @@ if (!isset($_SESSION['usuario'])) {
 }
 
 require_once __DIR__.'/../vendor/autoload.php';
+
+use App\Core\Datatypes\Data;
 use App\Core\TableBuilder;
-use App\Core\ProcessData;
 use App\DAO\ModalidadesDAO;
 use App\DAO\TurmasDAO;
 use App\DAO\AulasDAO;
 
 $builder = new TableBuilder;
-$data = new ProcessData();
+$data = new Data();
 
 
 $conn = new TurmasDAO();
@@ -44,7 +45,7 @@ if(!empty($turmas)) {
             $button = $builder->CriarButao('chamada.php?id_turma=' . $turma['id'], 'Registrar Chamada', 'btn btn-sm btn-success');
         }
         
-        $linha = [$data->getDate('d-m-y'), $turma['dia_sem'], $conn->selectModalidadesbyID($turma['id_modalidade']), $turma['horario'], $button];
+        $linha = [$data->getDataString(), $turma['dia_sem'], $conn->selectModalidadesbyID($turma['id_modalidade']), $turma['horario'], $button];
         $matriz[] = $linha;
     }
 }

@@ -3,7 +3,6 @@
     use App\Core\DatabaseManager;
     use PDO;
     use PDOException;
-    use App\Core\ProcessData;
 
 
     class FrequenciaDAO {

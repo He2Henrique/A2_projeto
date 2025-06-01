@@ -6,6 +6,7 @@ if (!isset($_SESSION['usuario'])) {
 }
 require_once __DIR__.'/../vendor/autoload.php';
 
+use App\Core\Datatypes\Data;
 use App\Core\TableBuilder;
 use App\DAO\AulasDAO;
 use App\DAO\TurmasDAO;
@@ -18,6 +19,7 @@ $turmasDAO = new TurmasDAO();
 $matriculasDAO = new MatriculasDAO();
 $alunoDAO = new AlunoDAO();
 $logDAO = new LogDAO();
+$data = new Data();
 
 
 $id_turma = $_GET['id_turma'] ?? null;
@@ -118,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_turma)) {
 
         <h4 class="mb-4">
             <?php if (isset($turma)): ?>
-            <?= $data->getDate('d-m-y') ?> -
+            <?= $data->getDataString("d/m/y") ?> -
             <?= htmlspecialchars($turma['nome'] . ' - ' . $turma['faixa_etaria'] . ' - ' . $turma['dia_sem'] . ' - ' . $turma['horario']) ?>
             <?php else: ?>
             Aula não encontrada

@@ -1,7 +1,8 @@
 <?php
     namespace App\DAO;
     use App\Core\DatabaseManager;
-    use PDO;
+use App\Core\Datatypes\Data;
+use PDO;
     use PDOException;
     use App\Core\ProcessData;
 
@@ -13,8 +14,8 @@
 
         public function __construct() {
             $this->conn = DatabaseManager::getInstance()->getConnection();
-            $this->data = new ProcessData();
-            $this->diasemana = $this->data->getDiaSemana();
+            $this->data = new Data();
+            $this->diasemana = $this->data->getDiaSemanaAtual();
         }
 
         public function selectTurmasALL() {

@@ -8,8 +8,6 @@ use InvalidArgumentException;
 
 class DataNascimento extends Data{
     private $dataNascimento;
-    private $IDADE_MINIMA = 4;
-
 
     public function __construct(string $dataNascimento){
         

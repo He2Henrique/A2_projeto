@@ -40,7 +40,7 @@ class AlunoRequest{
             $this->email = ($_post['email'] !== '') ? new Email($_post['email']) : null;
             $this->nome_responsavel = ($_post['nome_responsavel']!== '') ? new NomeCompleto($_post['nome_responsavel']) : null;
             $this->nomesocial = ($_post['nome_social']!== '') ? new Nome($_post['nomesocial']) : null;
-            $this->data_matricula = $data->getData();
+            $this->data_matricula = $data->getDataString();
             
         } catch (InvalidArgumentException $e) {
             throw new InvalidArgumentException($e->getMessage());
