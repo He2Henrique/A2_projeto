@@ -18,48 +18,19 @@ Este projeto foi desenvolvido como parte de um trabalho acadêmico, com o objeti
 - ✔Edição de chamadas
 
 ## 💡Informações Relevantes:
-
->> Conexão com Banco de Dados:
-```php
-use PDO;
-use PDOException;
-use Exception;
-
-class DatabaseManager {
-    private static $instance = null;
-    private $connection;
-
-    private $host = 'localhost';
-    private $username = 'root';
-    private $password = '';
-    private $database = 'instituicao';
 ```
-A conexão com o banco de dados é gerenciada pela classe `DatabaseManager` (em `src/Core/DatabaseManager.php`), que utiliza o padrão Singleton para garantir que apenas uma instância da conexão `PDO` seja utilizada em toda a aplicação.
-
->> Registro de Presença:
-```php
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($id_turma)) {
-    try {
-        $id_aula = $aulasDAO->registrarAula($id_turma, $_SESSION['usuario']['id']);
+⚙️ Estrutura do repositorio ⚙️
+├── 📁 Dependences
+├── 📁 Public
+│   └── pages.php
+├── 📁 Src
+│   └── 📁 DAO(Persistence)
+│   └── 📁 Core
+|       └── 📁Datatypes
+|       └── DatabaseManager.php
+|       └── AlunoRequest.php
 ```
-Aqui é registrada uma nova aula no banco de dados.
 
-```php
-foreach ($alunos as $aluno) {
-    $presenca = ($_POST['presenca'][$aluno['id']] === 'presente') ? 1 : 0;
-    $justificativa = $_POST['justificativa'][$aluno['id']] ?? null;
-    
-    if ($justificativa !== null && strlen(trim($justificativa)) <= 4) {
-        $justificativa = null;
-    }
-
-    $id_frequencia = $aulasDAO->registrarFrequencia(
-        $matriculas_do_aluno[$aluno['id']],
-        $id_aula,
-        $presenca,
-        $justificativa
-    );
-```
 
 #### 📸Visual da Seção de Registro de Presença:
 <p align="center">
