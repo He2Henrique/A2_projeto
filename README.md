@@ -13,7 +13,7 @@ Este projeto foi desenvolvido como parte de um trabalho acadêmico, com o objeti
 - ✔Pesquisa e edição de alunos
 - ✔Visualização da lista de alunos por turma
 - ✔Histórico de chamadas
-- ✔Relatório dos alunos (Notas e Faltas)
+- ✔Relatório dos alunos referente as suas faltas
 - ✔Edição de alunos
 - ✔Edição de chamadas
 
@@ -60,20 +60,6 @@ foreach ($alunos as $aluno) {
         $justificativa
     );
 ```
-Esse trecho é o responsável pela inserção da presença do aluno no banco de dados, utilizando o método ```registrarFrequencia()```.
-```php
- if ($id_frequencia) {
-        $logDAO->registrarLog(
-            $_SESSION['usuario']['id'],
-            'Registro de frequência',
-            'frequencia',
-            $id_frequencia,
-            "Aluno ID: {$aluno['id']}, Aula ID: $id_aula, Presente: " . ($presenca ? 'Sim' : 'Não')
-        );
-    }
-}
-```
-Por fim, esse trecho é o responsável por amazenar cada registro de frequência.
 
 #### 📸Visual da Seção de Registro de Presença:
 <p align="center">
